@@ -1,4 +1,4 @@
-package ch.styp;
+package ch.wakeLanaka;
 
 import java.util.Arrays;
 
@@ -6,9 +6,14 @@ import jdk.incubator.vector.FloatVector;
 
 import jdk.incubator.vector.VectorSpecies;
 
+import jdk.incubator.vector.GPUVector;
+
+import jdk.incubator.vector.SVMBuffer;
+import jdk.incubator.vector.GPUInformation;
 
 public class MatrixMul {
     private static final VectorSpecies<Float> SPECIES = FloatVector.SPECIES_PREFERRED;
+    private static final GPUInformation SPECIES_SVM = SVMBuffer.SPECIES_PREFERRED;
 
     public float[] baseline(float[] a, float[] b, int n) {
         float[] c = new float[n * n];
@@ -22,6 +27,20 @@ public class MatrixMul {
                 c[i * n + j] = sum;
             }
         }
+        return c;
+    }
+
+    public float[] gpuMatrix(float[] a, float[] b, int n){
+        float [] c = new float[n * n];
+        var buffer1 = SVMBuffer.fromArray(SPECIES_SVM, a);
+        var buffer2 = SVMBuffer.fromArray(SPECIES_SVM, b);
+        var buffer3 = SVMBuffer.fromArray(SPECIES_SVM, c);
+
+        for(int k = 0; k < n; k++){
+            buffer1.matrixFma(buffer2, buffer3, n, n, k);
+        }
+        buffer3.intoArray(c);
+
         return c;
     }
 
@@ -78,6 +97,12 @@ public class MatrixMul {
         }
         return c;
     }
+
+    // public float[] gpuMatrix(float[] a, float[] b, int n) {
+    //     var c = new float[n * n];
+    //     GPUVector.gpuMatrix(a, b, c, n);
+    //     return c;
+    // }
 
     public float[] simpleVectorAVX256(float[] a, float[] b, int n) {
         final VectorSpecies<Float> SPECIES = FloatVector.SPECIES_256;

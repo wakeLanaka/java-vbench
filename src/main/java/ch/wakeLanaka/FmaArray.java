@@ -1,13 +1,17 @@
-package ch.styp;
+package ch.wakeLanaka;
 
 import jdk.incubator.vector.FloatVector;
 import jdk.incubator.vector.IntVector;
 import jdk.incubator.vector.VectorOperators;
 import jdk.incubator.vector.VectorSpecies;
 
+import jdk.incubator.vector.SVMBuffer;
+import jdk.incubator.vector.GPUInformation;
+
 public class FmaArray {
 
     private static final VectorSpecies<Float> SPECIES = FloatVector.SPECIES_PREFERRED;
+    private static final GPUInformation SPECIES_SVM = SVMBuffer.SPECIES_PREFERRED;
 
     // FMA: Fused Multiply Add: c = c + (a * b)
     public static float scalarFMA(float[] a, float[] b){
@@ -16,6 +20,20 @@ public class FmaArray {
         for(var i=0; i < a.length; i++){
             c = Math.fma(a[i], b[i], c);
         }
+        return c;
+    }
+
+    public static float gpuFMA(float[] a, float[] b){
+        float[] x = new float[a.length];
+
+        var buffer1 = SVMBuffer.fromArray(SPECIES_SVM, a);
+        var buffer2 = SVMBuffer.fromArray(SPECIES_SVM, b);
+        var buffer3 = SVMBuffer.fromArray(SPECIES_SVM, x);
+
+        buffer1.Fma(buffer2, buffer3);
+
+        var c = buffer3.reduceAdd();
+
         return c;
     }
 

@@ -1,4 +1,4 @@
-package ch.styp;
+package ch.wakeLanaka;
 
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;

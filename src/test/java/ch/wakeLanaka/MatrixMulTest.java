@@ -1,4 +1,4 @@
-package ch.styp;
+package ch.wakeLanaka;
 
 import org.junit.jupiter.api.Test;
 
