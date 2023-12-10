@@ -5,7 +5,6 @@
 
 // import org.openjdk.jmh.infra.Blackhole;
 // import jdk.incubator.vector.SVMBuffer;
-// import jdk.incubator.vector.ExecBuffer;
 // import jdk.incubator.vector.GPUInformation;
 
 // public class BlackScholesBenchmark {

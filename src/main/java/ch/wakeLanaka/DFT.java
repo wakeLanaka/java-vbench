@@ -14,61 +14,82 @@ public class DFT {
     private static final GPUInformation SPECIES_SVM = SVMBuffer.SPECIES_PREFERRED;
     static final VectorSpecies<Float> fsp = FloatVector.SPECIES_PREFERRED;
 
-    public static void computeSerial(float[] inReal, float[] outReal){
+    public static void computeSerial(float[] inReal, float[] outReal, float[] inImag, float[] outImag){
         int n = inReal.length;
         float twoPI = 2 * (float)Math.PI;
 
         for(int k = 0; k < n; k++){
             float sumreal = 0;
-
+            float sumimag = 0;
             for(int t = 0; t < n; t++){
                 float angle = twoPI * t * k / n;
-                sumreal += (inReal[t] * (float)Math.cos(angle));
+                sumreal += (inReal[t] * Math.cos(angle)) + (inImag[t] * Math.sin(angle));
+                sumimag += -(inReal[t] * (float)Math.sin(angle)) + inImag[t] * Math.cos(angle);
             }
-
             outReal[k] = sumreal;
+            outImag[k] = sumimag;
         }
     }
 
-    public static void computeAVX(float[] inReal,float[] outReal, float[] t){
+    public static void computeAVX(float[] inReal, float[] outReal, float[] inImag, float[] outImag, float[] t){
         int n = inReal.length;
         float twoPI = 2 * (float)Math.PI;
 
         for(int k = 0; k < n; k++){
-            float sum = 0;
+            float sumReal = 0;
+            float sumImag = 0;
             for (int i = 0; i <= inReal.length - fsp.length(); i += fsp.length()) {
                 var vt = FloatVector.fromArray(fsp, t, i);
-                var angle = vt.mul(k).mul(twoPI).div(n);
                 var vinReal = FloatVector.fromArray(fsp, inReal, i);
-                sum += angle.lanewise(VectorOperators.COS).mul(vinReal).reduceLanes(VectorOperators.ADD);
+                var vinImag = FloatVector.fromArray(fsp, inImag, i);
+                var angle = vt.mul(k).mul(twoPI).div(n);
+                sumReal += angle.lanewise(VectorOperators.COS).mul(vinReal).add(vinImag.mul(angle.lanewise(VectorOperators.SIN))).reduceLanes(VectorOperators.ADD);
+                sumImag += angle.lanewise(VectorOperators.SIN).mul(vinReal).neg().add(vinImag.mul(angle.lanewise(VectorOperators.COS))).reduceLanes(VectorOperators.ADD);
             }
-            outReal[k] = sum;
+            outReal[k] = sumReal;
+            outImag[k] = sumImag;
         }
     }
 
-    public static void computeOpenCL(SVMBuffer a, SVMBuffer b){
-        SVMBuffer.DFT(SPECIES_SVM, a, b);
+    public static void computeOpenCL(SVMBuffer inReal, SVMBuffer outReal, SVMBuffer inImag, SVMBuffer outImag){
+        SVMBuffer.DFT(SPECIES_SVM, inReal, outReal, inImag, outImag);
     }
 
-    public static void computeKernelBuilder(float[] a, float[] b){
-        int n = a.length;
+    public static void computeKernelBuilder(float[] inReal, float[] outReal, float[] inImag, float[] outImag){
+        int n = inReal.length;
 
         var loop = ForKernelBuilder.For(0, n, 1);
-            var inReal = SVMBuffer.fromArray(loop.getInfo(), a);
-            var outReal = SVMBuffer.fromArray(loop.getInfo(), b);
+            var vinReal = SVMBuffer.fromArray(loop.getInfo(), inReal);
+            var voutReal = SVMBuffer.fromArray(loop.getInfo(), outReal);
+            var vinImag = SVMBuffer.fromArray(loop.getInfo(), inImag);
+            var voutImag = SVMBuffer.fromArray(loop.getInfo(), outImag);
+
             var angle = loop.body.Iota().Mul(2).Mul((float)Math.PI).Mul(loop.getIndex()).Div(n);
-            loop.body = loop.body.AddAssign(outReal, angle.Cos().Mul(inReal, loop.getIndex()));
+            loop.body = loop.body.AddAssign(voutReal, angle.Cos().Mul(vinReal, loop.getIndex()).Add(angle.Sin().Mul(vinImag, loop.getIndex())));
+            loop.body = loop.body.AddAssign(voutImag, angle.Sin().Mul(vinReal, loop.getIndex()).Mul(-1).Add(angle.Cos().Mul(vinImag, loop.getIndex())));
         loop.End();
 
-        outReal.intoArray(b);
+        voutReal.intoArray(outReal);
+        voutImag.intoArray(outImag);
     }
 
-    public static void computeSVM(SVMBuffer inReal, float[] outReal, SVMBuffer iotaT){
+    public static void computeSVM(SVMBuffer inReal, float[] outReal, SVMBuffer inImag, float[] outImag, SVMBuffer iotaT){
         int n = inReal.length;
         float twoPI = 2 * (float)Math.PI;
 
         for(int k = 0; k < n; k++) {
-            outReal[k] = iotaT.Multiply(twoPI).MultiplyInPlace(k).DivisionInPlace(n).Cos().MultiplyInPlace(inReal).reduceAdd();
+            var angle = iotaT.Multiply(twoPI).MultiplyInPlace(k).DivisionInPlace(n);
+            var real1 = angle.Cos().MultiplyInPlace(inReal);
+            var imag1 = angle.Sin().MultiplyInPlace(inImag);
+            outReal[k] = real1.AddInPlace(imag1).SumReduce();
+            var real2 = angle.Sin().MultiplyInPlace(inReal).MultiplyInPlace(-1);
+            var imag2 = angle.Cos().MultiplyInPlace(inImag);
+            outImag[k] = real2.AddInPlace(imag2).SumReduce();
+            angle.releaseSVMBuffer();
+            real1.releaseSVMBuffer();
+            imag1.releaseSVMBuffer();
+            real2.releaseSVMBuffer();
+            imag2.releaseSVMBuffer();
         }
     }
 }

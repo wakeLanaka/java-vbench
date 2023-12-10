@@ -32,7 +32,7 @@ public class FmaArray {
 
         buffer1.Fma(buffer2, buffer3);
 
-        var c = buffer3.reduceAdd();
+        var c = buffer3.SumReduce();
 
         return c;
     }

@@ -2,7 +2,6 @@ package ch.wakeLanaka;
 
 import java.lang.Math;
 import jdk.incubator.vector.SVMBuffer;
-import jdk.incubator.vector.ExecBuffer;
 import jdk.incubator.vector.GPUInformation;
 
 import jdk.incubator.vector.FloatVector;
