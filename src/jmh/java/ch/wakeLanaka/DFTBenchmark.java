@@ -12,8 +12,7 @@ public class DFTBenchmark {
     @State(Scope.Thread)
     public static class BenchmarkSetup{
 
-        // @Param({/* "1024", "16384",  */ /* "32768" */  "65536"})
-        @Param({"16"})
+        @Param({"1024", "16384", "32768"})
         public int size;
         public float[] inReal;
         public float[] inImag;
@@ -134,46 +133,46 @@ public class DFTBenchmark {
     //     // System.out.println(state.outImag[state.size - 1]);
     // }
 
-    // @Benchmark
-    // @BenchmarkMode(Mode.AverageTime)
-    // public void DFTSVM(BenchmarkSetup state){
-    //     DFT.computeSVM(state.inRealBuf, state.outReal, state.outRealBuf, state.outImag, state.iotaT);
-    // }
+    @Benchmark
+    @BenchmarkMode(Mode.AverageTime)
+    public void DFTSVM(BenchmarkSetup state){
+        DFT.computeSVM(state.inRealBuf, state.outReal, state.outRealBuf, state.outImag, state.iotaT);
+    }
 
-    // @Benchmark
-    // @BenchmarkMode(Mode.AverageTime)
-    // public void DFTOpenCL(BenchmarkSetup state){
-    //     DFT.computeOpenCL(state.inRealBuf, state.outRealBuf);
-    // }
+    @Benchmark
+    @BenchmarkMode(Mode.AverageTime)
+    public void DFTOpenCL(BenchmarkSetup state){
+        DFT.computeOpenCL(state.inRealBuf, state.outRealBuf);
+    }
 
-    // @Benchmark
-    // @BenchmarkMode(Mode.AverageTime)
-    // public void DFTOpenCLWithCopy(BenchmarkSetup state){
-    //     var inRealBuf = SVMBuffer.fromArray(SPECIES_SVM, state.inReal);
-    //     var outRealBuf = SVMBuffer.fromArray(SPECIES_SVM, state.outReal);
+    @Benchmark
+    @BenchmarkMode(Mode.AverageTime)
+    public void DFTOpenCLWithCopy(BenchmarkSetup state){
+        var inRealBuf = SVMBuffer.fromArray(SPECIES_SVM, state.inReal);
+        var outRealBuf = SVMBuffer.fromArray(SPECIES_SVM, state.outReal);
 
-    //     DFT.computeOpenCL(inRealBuf, outRealBuf);
+        DFT.computeOpenCL(inRealBuf, outRealBuf);
 
-    //     inRealBuf.intoArray(state.inReal);
-    //     outRealBuf.intoArray(state.outReal);
-    // }
+        inRealBuf.intoArray(state.inReal);
+        outRealBuf.intoArray(state.outReal);
+    }
 
 
-    // @Benchmark
-    // @BenchmarkMode(Mode.AverageTime)
-    // public void DFTAVX(BenchmarkSetup state){
-    //     DFT.computeAVX(state.inReal, state.outReal, state.inImag, state.outImag, state.t);
-    // }
+    @Benchmark
+    @BenchmarkMode(Mode.AverageTime)
+    public void DFTAVX(BenchmarkSetup state){
+        DFT.computeAVX(state.inReal, state.outReal, state.inImag, state.outImag, state.t);
+    }
 
-    // @Benchmark
-    // @BenchmarkMode(Mode.AverageTime)
-    // public void KernelBuilderWithCopy(BenchmarkSetup state){
-    //     DFT.computeKernelBuilder(state.inReal, state.outReal);
-    // }
+    @Benchmark
+    @BenchmarkMode(Mode.AverageTime)
+    public void KernelBuilderWithCopy(BenchmarkSetup state){
+        DFT.computeKernelBuilder(state.inReal, state.outReal);
+    }
 
-    // @Benchmark
-    // @BenchmarkMode(Mode.AverageTime)
-    // public void DFTSerial(BenchmarkSetup state){
-    //     DFT.computeSerial(state.inReal, state.outReal, state.inImag, state.outImag);
-    // }
+    @Benchmark
+    @BenchmarkMode(Mode.AverageTime)
+    public void DFTSerial(BenchmarkSetup state){
+        DFT.computeSerial(state.inReal, state.outReal, state.inImag, state.outImag);
+    }
 }

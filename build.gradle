@@ -39,7 +39,7 @@ jmh {
     benchmarkParameters =  [:] // Benchmark parameters.
     profilers = [] // Use profilers to collect additional data. Supported profilers: [cl, comp, gc, stack, perf, perfnorm, perfasm, xperf, xperfasm, hs_cl, hs_comp, hs_gc, hs_rt, hs_thr, async]
 //    profilers = ['perfnorm'] // Use profilers to collect additional data. Supported profilers: [cl, comp, gc, stack, perf, perfnorm, perfasm, xperf, xperfasm, hs_cl, hs_comp, hs_gc, hs_rt, hs_thr, async]
-    timeOnIteration = '1s' // Time to spend at each measurement iteration.
+    timeOnIteration = '10s' // Time to spend at each measurement iteration.
     resultFormat = 'CSV' // Result format type (one of CSV, JSON, NONE, SCSV, TEXT)
     synchronizeIterations = false // Synchronize iterations?
     // threads = 1 // Number of worker threads to run with.
