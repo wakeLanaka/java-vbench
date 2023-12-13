@@ -46,7 +46,7 @@ public class DFTBenchmark {
             outImag = new float[size];
             outRealBuf = SVMBuffer.fromArray(SPECIES_SVM, outReal);
             outImagBuf = SVMBuffer.fromArray(SPECIES_SVM, outImag);
-            iotaT = SVMBuffer.Iota(SPECIES_SVM, size);
+            iotaT = SVMBuffer.iota(SPECIES_SVM, size);
         }
 
         @TearDown(Level.Invocation)
@@ -142,7 +142,7 @@ public class DFTBenchmark {
     @Benchmark
     @BenchmarkMode(Mode.AverageTime)
     public void DFTOpenCL(BenchmarkSetup state){
-        DFT.computeOpenCL(state.inRealBuf, state.outRealBuf);
+        DFT.computeOpenCL(state.inRealBuf, state.outRealBuf, state.inImagBuf, state.outImagBuf);
     }
 
     @Benchmark
@@ -150,11 +150,18 @@ public class DFTBenchmark {
     public void DFTOpenCLWithCopy(BenchmarkSetup state){
         var inRealBuf = SVMBuffer.fromArray(SPECIES_SVM, state.inReal);
         var outRealBuf = SVMBuffer.fromArray(SPECIES_SVM, state.outReal);
+        var inImagBuf = SVMBuffer.fromArray(SPECIES_SVM, state.inImag);
+        var outImagBuf = SVMBuffer.fromArray(SPECIES_SVM, state.outImag);
 
-        DFT.computeOpenCL(inRealBuf, outRealBuf);
+        DFT.computeOpenCL(inRealBuf, outRealBuf, inImagBuf, outImagBuf);
 
-        inRealBuf.intoArray(state.inReal);
         outRealBuf.intoArray(state.outReal);
+        outImagBuf.intoArray(state.outImag);
+
+        inRealBuf.releaseSVMBuffer();
+        outRealBuf.releaseSVMBuffer();
+        inImagBuf.releaseSVMBuffer();
+        outImagBuf.releaseSVMBuffer();
     }
 
 
@@ -167,7 +174,7 @@ public class DFTBenchmark {
     @Benchmark
     @BenchmarkMode(Mode.AverageTime)
     public void KernelBuilderWithCopy(BenchmarkSetup state){
-        DFT.computeKernelBuilder(state.inReal, state.outReal);
+        DFT.computeKernelBuilder(state.inReal, state.outReal, state.inImag, state.outImag);
     }
 
     @Benchmark

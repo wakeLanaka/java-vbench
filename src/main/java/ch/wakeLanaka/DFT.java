@@ -78,13 +78,13 @@ public class DFT {
         float twoPI = 2 * (float)Math.PI;
 
         for(int k = 0; k < n; k++) {
-            var angle = iotaT.Multiply(twoPI).MultiplyInPlace(k).DivisionInPlace(n);
-            var real1 = angle.Cos().MultiplyInPlace(inReal);
-            var imag1 = angle.Sin().MultiplyInPlace(inImag);
-            outReal[k] = real1.AddInPlace(imag1).SumReduce();
-            var real2 = angle.Sin().MultiplyInPlace(inReal).MultiplyInPlace(-1);
-            var imag2 = angle.Cos().MultiplyInPlace(inImag);
-            outImag[k] = real2.AddInPlace(imag2).SumReduce();
+            var angle = iotaT.mul(twoPI).mulInPlace(k).divInPlace(n);
+            var real1 = angle.cos().mulInPlace(inReal);
+            var imag1 = angle.sin().mulInPlace(inImag);
+            outReal[k] = real1.addInPlace(imag1).SumReduce();
+            var real2 = angle.sin().mulInPlace(inReal).mulInPlace(-1);
+            var imag2 = angle.cos().mulInPlace(inImag);
+            outImag[k] = real2.addInPlace(imag2).SumReduce();
             angle.releaseSVMBuffer();
             real1.releaseSVMBuffer();
             imag1.releaseSVMBuffer();

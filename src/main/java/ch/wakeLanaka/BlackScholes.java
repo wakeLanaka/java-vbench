@@ -110,33 +110,33 @@ public class BlackScholes {
 
     private static SVMBuffer svmcdf(SVMBuffer vinp) {
         float[] help = new float[vinp.length];
-        var vx = vinp.Abs();
-        var vone = SVMBuffer.Broadcast(SPECIES_SVM, 1.0f, vinp.length);
-        var vtwo = SVMBuffer.Broadcast(SPECIES_SVM, 2.0f, vinp.length);
-        var vterm = vone.Division(vone.Add(vx.Multiply(Y)));
-        var vterm_pow2 = vterm.Multiply(vterm);
-        var vterm_pow3 = vterm_pow2.Multiply(vterm);
-        var vterm_pow4 = vterm_pow2.Multiply(vterm_pow2);
-        var vterm_pow5 = vterm_pow2.Multiply(vterm_pow3);
-        var vpart1 = vone.Division(vtwo.MultiplyInPlace(PI).SqrtInPlace()).MultiplyInPlace(vx.MultiplyInPlace(vx).MultiplyInPlace(-1.0f).MultiplyInPlace(0.5f).ExpInPlace());
-        var vpart2 = vterm.MultiplyInPlace(A1).AddInPlace(vterm_pow2.MultiplyInPlace(A2)).AddInPlace(vterm_pow3.MultiplyInPlace(A3)).AddInPlace(vterm_pow4.MultiplyInPlace(A4)).AddInPlace(vterm_pow5.MultiplyInPlace(A5)); 
-        var vmask = vinp.CompareGT(0f);
-        var vresult1 = vpart1.MultiplyInPlace(vpart2);
-        var vresult2 = vresult1.Multiply(-1.0f).AddInPlace(vone);
-        var vresult = vresult1.BlendInPlace(vresult2, vmask);
+        var vx = vinp.abs();
+        var vone = SVMBuffer.broadcast(SPECIES_SVM, 1.0f, vinp.length);
+        var vtwo = SVMBuffer.broadcast(SPECIES_SVM, 2.0f, vinp.length);
+        var vterm = vone.div(vone.add(vx.mul(Y)));
+        var vterm_pow2 = vterm.mul(vterm);
+        var vterm_pow3 = vterm_pow2.mul(vterm);
+        var vterm_pow4 = vterm_pow2.mul(vterm_pow2);
+        var vterm_pow5 = vterm_pow2.mul(vterm_pow3);
+        var vpart1 = vone.div(vtwo.mulInPlace(PI).sqrtInPlace()).mulInPlace(vx.mulInPlace(vx).mulInPlace(-1.0f).mulInPlace(0.5f).expInPlace());
+        var vpart2 = vterm.mulInPlace(A1).addInPlace(vterm_pow2.mulInPlace(A2)).addInPlace(vterm_pow3.mulInPlace(A3)).addInPlace(vterm_pow4.mulInPlace(A4)).addInPlace(vterm_pow5.mulInPlace(A5)); 
+        var vmask = vinp.compareGT(0f);
+        var vresult1 = vpart1.mulInPlace(vpart2);
+        var vresult2 = vresult1.mul(-1.0f).addInPlace(vone);
+        var vresult = vresult1.blendInPlace(vresult2, vmask);
 
         return vresult;
     }
 
     public static void computeSVM(SVMBuffer vsig, SVMBuffer vr, SVMBuffer vnegr, SVMBuffer vx, SVMBuffer vcall, SVMBuffer vput, SVMBuffer vt, SVMBuffer vs0){
-        var vsig_sq_by2 = vsig.Multiply(vsig).MultiplyInPlace(0.5f);
-        var vlog_s0byx = vs0.Division(vx).LogInPlace();
-        var vsig_sqrt_t = vt.Sqrt().MultiplyInPlace(vsig);
-        var vexp_neg_rt = vt.Multiply(vnegr).ExpInPlace();
-        var vd1 = vsig_sq_by2.AddInPlace(vr).MultiplyInPlace(vt).AddInPlace(vlog_s0byx).DivisionInPlace(vsig_sqrt_t);
-        var vd2 = vd1.Subtract(vsig_sqrt_t);
-        vcall = vs0.Multiply(svmcdf(vd1)).SubtractInPlace(vx.MultiplyInPlace(vexp_neg_rt).MultiplyInPlace(svmcdf(vd2)));
-        vput = vcall.Add(vexp_neg_rt).SubtractInPlace(vs0);
+        var vsig_sq_by2 = vsig.mul(vsig).mulInPlace(0.5f);
+        var vlog_s0byx = vs0.div(vx).logInPlace();
+        var vsig_sqrt_t = vt.sqrt().mulInPlace(vsig);
+        var vexp_neg_rt = vt.mul(vnegr).expInPlace();
+        var vd1 = vsig_sq_by2.addInPlace(vr).mulInPlace(vt).addInPlace(vlog_s0byx).divInPlace(vsig_sqrt_t);
+        var vd2 = vd1.sub(vsig_sqrt_t);
+        vcall = vs0.mul(svmcdf(vd1)).subInPlace(vx.mulInPlace(vexp_neg_rt).mulInPlace(svmcdf(vd2)));
+        vput = vcall.add(vexp_neg_rt).subInPlace(vs0);
     }
 
     public static void computeOpenCL(float sig, float r, SVMBuffer x, SVMBuffer call, SVMBuffer put, SVMBuffer t, SVMBuffer s0){

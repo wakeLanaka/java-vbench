@@ -46,18 +46,6 @@ public class SumArray {
 
     }
 
-    // public static int[] gpuComputation(int[] a, int[] b) {
-    //     var c = new int[a.length];
-    //     var upperBound_gpu = SPECIES_GPU.loopBound(a.length);
-    //     for(int i = 0; i < upperBound_gpu; i += SPECIES_GPU.length(i)) {
-    //         var va1 = GPUVector.fromArray(SPECIES_GPU, a, i);
-    //         var vb1 = GPUVector.fromArray(SPECIES_GPU, b, i);
-    //         var vc1 = va1.add(vb1);
-    //         vc1.intoArray(c, i);
-    //     }
-    //     return c;
-    // }
-
     public static float[] gpuZeroCopyAdd(float[] a, float[] b) {
         var va = GPUVector.fromArray(SPECIES_SVM, a);
         var vb = GPUVector.fromArray(SPECIES_SVM, b);
@@ -67,7 +55,7 @@ public class SumArray {
 
     public static float[] gpuSVMAddition(SVMBuffer bufferA, SVMBuffer bufferB) {
         float[] c = new float[bufferA.length];
-        var bufferC = bufferA.Add(bufferB);
+        var bufferC = bufferA.add(bufferB);
         bufferC.releaseSVMBuffer();
         return c;
     }
@@ -76,7 +64,7 @@ public class SumArray {
         float[] c = new float[a.length];
         SVMBuffer bufferA = SVMBuffer.fromArray(SPECIES_SVM, a);
         SVMBuffer bufferB = SVMBuffer.fromArray(SPECIES_SVM, b);
-        var bufferC = bufferA.Add(bufferB);
+        var bufferC = bufferA.add(bufferB);
         bufferC.intoArray(c);
         return c;
     }

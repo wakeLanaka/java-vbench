@@ -30,7 +30,7 @@ public class FmaArray {
         var buffer2 = SVMBuffer.fromArray(SPECIES_SVM, b);
         var buffer3 = SVMBuffer.fromArray(SPECIES_SVM, x);
 
-        buffer1.Fma(buffer2, buffer3);
+        buffer1.fma(buffer2, buffer3);
 
         var c = buffer3.SumReduce();
 

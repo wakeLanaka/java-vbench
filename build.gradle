@@ -19,6 +19,14 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
 }
 
+compileJmhJava {
+    options.compilerArgs += ["--add-modules", "jdk.incubator.vector"]
+}
+
+jmhRunBytecodeGenerator {
+    jvmArgs.add '--add-modules=jdk.incubator.vector'
+}
+
 var incubatorArguments = ["--add-modules", "jdk.incubator.vector"]
 tasks.withType(AbstractCompile) { options.compilerArgs += incubatorArguments }
 tasks.withType(Test) { jvmArgs += incubatorArguments }
