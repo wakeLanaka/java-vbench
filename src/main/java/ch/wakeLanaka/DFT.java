@@ -81,10 +81,10 @@ public class DFT {
             var angle = iotaT.mul(twoPI).mulInPlace(k).divInPlace(n);
             var real1 = angle.cos().mulInPlace(inReal);
             var imag1 = angle.sin().mulInPlace(inImag);
-            outReal[k] = real1.addInPlace(imag1).SumReduce();
+            outReal[k] = real1.addInPlace(imag1).sumReduce();
             var real2 = angle.sin().mulInPlace(inReal).mulInPlace(-1);
             var imag2 = angle.cos().mulInPlace(inImag);
-            outImag[k] = real2.addInPlace(imag2).SumReduce();
+            outImag[k] = real2.addInPlace(imag2).sumReduce();
             angle.releaseSVMBuffer();
             real1.releaseSVMBuffer();
             imag1.releaseSVMBuffer();

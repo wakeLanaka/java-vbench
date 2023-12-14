@@ -12,7 +12,7 @@ public class DFTBenchmark {
     @State(Scope.Thread)
     public static class BenchmarkSetup{
 
-        @Param({"1024", "16384", "32768"})
+        @Param({"1024", "16384", "32768", "65536"})
         public int size;
         public float[] inReal;
         public float[] inImag;
@@ -57,82 +57,6 @@ public class DFTBenchmark {
         }
     }
 
-    // @Benchmark
-    // @BenchmarkMode(Mode.AverageTime)
-    // public void DFTTEST(BenchmarkSetup state){
-    //     DFT.computeOpenCL(state.inRealBuf, state.outRealBuf, state.inImagBuf, state.outImagBuf);
-    //     state.outRealBuf.intoArray(state.outReal);
-    //     state.outImagBuf.intoArray(state.outImag);
-    //     System.out.println("\nOpenCL REAL");
-    //     System.out.println(state.outReal[0]);
-    //     System.out.println(state.outReal[1]);
-    //     System.out.println(state.outReal[state.size - 2]);
-    //     System.out.println(state.outReal[state.size - 1]);
-    //     System.out.println("OpenCL IMAG");
-    //     System.out.println(state.outImag[0]);
-    //     System.out.println(state.outImag[1]);
-    //     System.out.println(state.outImag[state.size - 2]);
-    //     System.out.println(state.outImag[state.size - 1]);
-
-    //     state.outReal = new float[state.size];
-    //     state.outImag = new float[state.size];
-
-    //     DFT.computeSerial(state.inReal, state.outReal, state.inImag, state.outImag);
-    //     System.out.println("\nSerial REAL");
-    //     System.out.println(state.outReal[0]);
-    //     System.out.println(state.outReal[1]);
-    //     System.out.println(state.outReal[state.size - 2]);
-    //     System.out.println(state.outReal[state.size - 1]);
-    //     System.out.println("Serial IMAG");
-    //     System.out.println(state.outImag[0]);
-    //     System.out.println(state.outImag[1]);
-    //     System.out.println(state.outImag[state.size - 2]);
-    //     System.out.println(state.outImag[state.size - 1]);
-
-    //     // state.outReal = new float[state.size];
-    //     // state.outImag = new float[state.size];
-    //     // DFT.computeSVM(state.inRealBuf, state.outReal, state.inImagBuf, state.outImag, state.iotaT);
-    //     // System.out.println("\nSVM REAL");
-    //     // System.out.println(state.outReal[0]);
-    //     // System.out.println(state.outReal[1]);
-    //     // System.out.println(state.outReal[state.size - 2]);
-    //     // System.out.println(state.outReal[state.size - 1]);
-    //     // System.out.println("SVM IMAG");
-    //     // System.out.println(state.outImag[0]);
-    //     // System.out.println(state.outImag[1]);
-    //     // System.out.println(state.outImag[state.size - 2]);
-    //     // System.out.println(state.outImag[state.size - 1]);
-
-    //     // state.outReal = new float[state.size];
-    //     // state.outImag = new float[state.size];
-
-    //     // DFT.computeAVX(state.inReal, state.outReal, state.inImag, state.outImag, state.t);
-    //     // System.out.println("\nAVX REAL");
-    //     // System.out.println(state.outReal[0]);
-    //     // System.out.println(state.outReal[1]);
-    //     // System.out.println(state.outReal[state.size - 2]);
-    //     // System.out.println(state.outReal[state.size - 1]);
-    //     // System.out.println("AVX IMAG");
-    //     // System.out.println(state.outImag[0]);
-    //     // System.out.println(state.outImag[1]);
-    //     // System.out.println(state.outImag[state.size - 2]);
-    //     // System.out.println(state.outImag[state.size - 1]);
-
-    //     // state.outReal = new float[state.size];
-    //     // state.outImag = new float[state.size];
-    //     // DFT.computeKernelBuilder(state.inReal, state.outReal, state.inImag, state.outImag);
-    //     // System.out.println("\nKernelBuilder REAL");
-    //     // System.out.println(state.outReal[0]);
-    //     // System.out.println(state.outReal[1]);
-    //     // System.out.println(state.outReal[state.size - 2]);
-    //     // System.out.println(state.outReal[state.size - 1]);
-    //     // System.out.println("KernelBuilder IMAG");
-    //     // System.out.println(state.outImag[0]);
-    //     // System.out.println(state.outImag[1]);
-    //     // System.out.println(state.outImag[state.size - 2]);
-    //     // System.out.println(state.outImag[state.size - 1]);
-    // }
-
     @Benchmark
     @BenchmarkMode(Mode.AverageTime)
     public void DFTSVM(BenchmarkSetup state){
@@ -141,9 +65,18 @@ public class DFTBenchmark {
 
     @Benchmark
     @BenchmarkMode(Mode.AverageTime)
-    public void DFTOpenCL(BenchmarkSetup state){
-        DFT.computeOpenCL(state.inRealBuf, state.outRealBuf, state.inImagBuf, state.outImagBuf);
+    public void DFTSVMWithCopy(BenchmarkSetup state){
+        var inRealBuf = SVMBuffer.fromArray(SPECIES_SVM, state.inReal);
+        var inImagBuf = SVMBuffer.fromArray(SPECIES_SVM, state.inImag);
+        var iotaT = SVMBuffer.fromArray(SPECIES_SVM, state.t);
+        DFT.computeSVM(inRealBuf, state.outReal, inImagBuf, state.outImag, iotaT);
     }
+
+    // @Benchmark
+    // @BenchmarkMode(Mode.AverageTime)
+    // public void DFTOpenCL(BenchmarkSetup state){
+    //     DFT.computeOpenCL(state.inRealBuf, state.outRealBuf, state.inImagBuf, state.outImagBuf);
+    // }
 
     @Benchmark
     @BenchmarkMode(Mode.AverageTime)
@@ -163,7 +96,6 @@ public class DFTBenchmark {
         inImagBuf.releaseSVMBuffer();
         outImagBuf.releaseSVMBuffer();
     }
-
 
     @Benchmark
     @BenchmarkMode(Mode.AverageTime)

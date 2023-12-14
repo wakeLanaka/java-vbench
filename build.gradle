@@ -12,6 +12,10 @@ repositories {
 
 test {
     useJUnitPlatform()
+    testLogging {
+        outputs.upToDateWhen {false}
+        showStandardStreams = true
+    }
 }
 
 dependencies {
@@ -40,14 +44,14 @@ jmh {
     forceGC = false // Should JMH force GC between iterations?
     jvmArgsAppend = incubatorArguments + " -Xmx14g" // + " -Xint" // + " -XX:-UseSuperWord"
     humanOutputFile =
-    project.file("${project.buildDir}/reports/jmh/human_dft_test.txt") // human-readable output file
+    project.file("${project.buildDir}/reports/jmh/human.txt") // human-readable output file
     resultsFile =
-    project.file("${project.buildDir}/reports/jmh/results_dft_test.txt") // results file
+    project.file("${project.buildDir}/reports/jmh/results.txt") // results file
     operationsPerInvocation = 10 // Operations per invocation.
     benchmarkParameters =  [:] // Benchmark parameters.
     profilers = [] // Use profilers to collect additional data. Supported profilers: [cl, comp, gc, stack, perf, perfnorm, perfasm, xperf, xperfasm, hs_cl, hs_comp, hs_gc, hs_rt, hs_thr, async]
 //    profilers = ['perfnorm'] // Use profilers to collect additional data. Supported profilers: [cl, comp, gc, stack, perf, perfnorm, perfasm, xperf, xperfasm, hs_cl, hs_comp, hs_gc, hs_rt, hs_thr, async]
-    timeOnIteration = '10s' // Time to spend at each measurement iteration.
+    timeOnIteration = '1s' // Time to spend at each measurement iteration.
     resultFormat = 'CSV' // Result format type (one of CSV, JSON, NONE, SCSV, TEXT)
     synchronizeIterations = false // Synchronize iterations?
     // threads = 1 // Number of worker threads to run with.
