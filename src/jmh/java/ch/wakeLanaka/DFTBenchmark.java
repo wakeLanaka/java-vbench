@@ -12,7 +12,7 @@ public class DFTBenchmark {
     @State(Scope.Thread)
     public static class BenchmarkSetup{
 
-        @Param({"1024", "16384", "32768", "65536"})
+        @Param({"64","1024", "4096", "16384", "32768", "65536"})
         public int size;
         public float[] inReal;
         public float[] inImag;

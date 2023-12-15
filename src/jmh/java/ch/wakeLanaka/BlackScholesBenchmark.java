@@ -11,9 +11,9 @@ public class BlackScholesBenchmark {
     private static final GPUInformation SPECIES_SVM = SVMBuffer.SPECIES_PREFERRED;
 
     @State(Scope.Thread)
-    public static class BenchmarkSetup{
+    public static class BenchmarkSetup {
 
-        @Param({"16", "32768", "65536"})
+        @Param({"16", "32768", "65536", "131072"})
         public int size;
 
         float[] s0;
