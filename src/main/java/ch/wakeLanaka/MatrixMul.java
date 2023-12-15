@@ -47,4 +47,36 @@ public class MatrixMul {
         }
         return c;
     }
+
+    public static float[] computeSVMRange(SVMBuffer a, SVMBuffer b, int n) {
+        float[] c = new float[n*n];
+
+        for(int i = 0; i < n; i++){
+            for(int k = 0; k < n; k++){
+                var res = a.mulRange(i * n, b, k * n, n);
+                c[i * n + k] = a.sumReduce();
+                res.releaseSVMBuffer();
+            }
+        }
+        return c;
+    }
+
+    public static float[] computeSVMNormal(float[] a, float[] b, int n, GPUInformation species) {
+        float[] c = new float[n*n];
+        SVMBuffer[] cacheA = new SVMBuffer[n];
+        SVMBuffer[] cacheB = new SVMBuffer[n];
+
+        for (int i = 0; i < n; i++) {
+            cacheA[i] = SVMBuffer.fromArray(species, a, i * n, n);
+            cacheB[i] = SVMBuffer.fromArray(species, b, i * n, n);
+        }
+        for(int i = 0; i < n; i++){
+            for(int k = 0; k < n; k++){
+                var res = cacheA[i].mul(cacheB[k]);
+                c[i * n + k] = res.sumReduce();
+                res.releaseSVMBuffer();
+            }
+        }
+        return c;
+    }
 }

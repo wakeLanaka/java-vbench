@@ -14,9 +14,8 @@ public class MatrixMulBenchmark {
 
     @State(Scope.Thread)
     public static class BenchmarkSetup {
-        @Param({"32" , "64", "128", "256", "512", "1024", "2048", "4096"})
+        @Param({"64","1024", "4096", "16384", "32768", "65536"})
         int size;
-
 
         private float[] left;
         private float[] right;
@@ -58,5 +57,15 @@ public class MatrixMulBenchmark {
     @Benchmark
     public void MatrixMulSVM(Blackhole bh, BenchmarkSetup state){
         bh.consume(MatrixMul.computeSVM(state.leftBuf, state.rightBuf, state.resultBuf, state.size));
+    }
+
+    @Benchmark
+    public void MatrixMulSVMNormal(Blackhole bh, BenchmarkSetup state){
+        bh.consume(MatrixMul.computeSVMNormal(state.left, state.right, state.size, SPECIES_SVM));
+    }
+
+    @Benchmark
+    public void MatrixMulSVMRange(Blackhole bh, BenchmarkSetup state){
+        bh.consume(MatrixMul.computeSVMRange(state.leftBuf, state.rightBuf, state.size));
     }
 }
