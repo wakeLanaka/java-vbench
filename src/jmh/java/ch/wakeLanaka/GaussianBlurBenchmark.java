@@ -52,23 +52,32 @@ public class GaussianBlurBenchmark {
     //     state.output = GaussianBlur.blurSerial(state.radius, state.input);
     // }
 
+    // @Benchmark
+    // @BenchmarkMode(Mode.AverageTime)
+    // public void gaussianBlurSerial(BenchmarkSetup state) throws Exception {
+    //     state.output = GaussianBlur.blurSerialWorking(state.radius, state.input);
+    //     // File outputfile = new File("/home/reto/Pictures/blured.png");
+    //     // ImageIO.write(state.output, "png", outputfile);
+    //     // System.out.println("Created!");
+    // }
+
     @Benchmark
     @BenchmarkMode(Mode.AverageTime)
-    public void gaussianBlurSerial(BenchmarkSetup state) throws Exception {
-        state.output = GaussianBlur.blurSerialWorking(state.radius, state.input);
+    public void gaussianBlurSVM(BenchmarkSetup state) throws Exception {
+        state.output = GaussianBlur.blurSVM(state.radius, state.ys, state.ys, state.input);
         File outputfile = new File("/home/reto/Pictures/blured.png");
         ImageIO.write(state.output, "png", outputfile);
         System.out.println("Created!");
     }
 
-    @Benchmark
-    @BenchmarkMode(Mode.AverageTime)
-    public void TEST(BenchmarkSetup state) throws Exception {
-        state.output = GaussianBlur.blurAVX(state.radius, state.ys, state.input);
-        // System.out.println("---SERIAL---");
-        // state.output = GaussianBlur.blurSerial(state.radius, state.input);
-        File outputfile = new File("/home/reto/Pictures/blured.png");
-        ImageIO.write(state.output, "png", outputfile);
-        System.out.println("Created!");
-    }
+    // @Benchmark
+    // @BenchmarkMode(Mode.AverageTime)
+    // public void TEST(BenchmarkSetup state) throws Exception {
+    //     state.output = GaussianBlur.blurAVX(state.radius, state.ys, state.input);
+    //     // System.out.println("---SERIAL---");
+    //     // state.output = GaussianBlur.blurSerial(state.radius, state.input);
+    //     File outputfile = new File("/home/reto/Pictures/blured.png");
+    //     ImageIO.write(state.output, "png", outputfile);
+    //     System.out.println("Created!");
+    // }
 }
