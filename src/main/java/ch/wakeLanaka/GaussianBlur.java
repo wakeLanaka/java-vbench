@@ -35,20 +35,23 @@ public class GaussianBlur {
 
         float[] kernel = new float[kernelWidth * kernelWidth];
         float exponentDenominator = 2 * sigma * sigma;
+        float expressionDenominator = exponentDenominator * (float)Math.PI;
         var vExponentDenominator = FloatVector.broadcast(SPECIES, exponentDenominator);
-        var vKernelDivision = FloatVector.broadcast(SPECIES, exponentDenominator * (float)Math.PI);
+        var vExpressionDenominator = FloatVector.broadcast(SPECIES, expressionDenominator);
 
         final int ysUpperBound = SPECIES.loopBound(ys.length);
         int i = 0;
         float sum = 0.0f;
+        FloatVector vy;
+        FloatVector vx;
         for (int x = -radius; x <= radius; x++) {
-            FloatVector vx = FloatVector.broadcast(SPECIES, x);
+            vx = FloatVector.broadcast(SPECIES, x);
             int j = 0;
             for (; j < ysUpperBound; j += SPECIES.length()) {
-                FloatVector vy = FloatVector.fromArray(SPECIES, ys, j);
+                vy = FloatVector.fromArray(SPECIES, ys, j);
                 var vExponentNumerator = vx.mul(vx).add(vy.mul(vy)).neg();
                 var vEExpression = vExponentNumerator.div(vExponentDenominator).lanewise(VectorOperators.EXP);
-                var vKernelValues = vEExpression.div(vKernelDivision);
+                var vKernelValues = vEExpression.div(vExpressionDenominator);
                 sum += vKernelValues.reduceLanes(VectorOperators.ADD);
                 vKernelValues.intoArray(kernel, i);
                 i+= SPECIES.length();
@@ -56,7 +59,7 @@ public class GaussianBlur {
             for(; j < ys.length; j++){
                 float exponentNumerator = -(x * x + ys[j] * ys[j]);
                 float eExpression = (float)Math.exp(exponentNumerator / exponentDenominator);
-                float kernelValue = eExpression / (2 * (float)Math.PI * sigma * sigma);
+                float kernelValue = eExpression / expressionDenominator;
                 kernel[i] = (float) kernelValue;
                 sum += kernelValue;
                 i++;
@@ -65,9 +68,10 @@ public class GaussianBlur {
 
         final int kernelUpperBound = SPECIES.loopBound(kernel.length);
         int j = 0;
+        FloatVector vKernel;
         for(; j < kernelUpperBound; j+= SPECIES.length()) {
-            var vkernel = FloatVector.fromArray(SPECIES, kernel, j);
-            var normalized = vkernel.div(sum);
+            vKernel = FloatVector.fromArray(SPECIES, kernel, j);
+            var normalized = vKernel.div(sum);
             normalized.intoArray(kernel, j);
         }
         for(; j < kernel.length; j++){
@@ -80,44 +84,83 @@ public class GaussianBlur {
                 var greenValue = 0.0f;
                 var blueValue = 0.0f;
                 int[] imagePixels = new int[kernel.length];
-                float[] reds = new float[kernel.length];
-                float[] greens = new float[kernel.length];
-                float[] blues = new float[kernel.length];
                 image.getRGB(x - radius, y - radius, kernelWidth, kernelWidth, imagePixels, 0, kernelWidth);
-                getColors(imagePixels, reds, greens, blues);
 
-                for(j = 0; j < kernelUpperBound; j+= SPECIES.length()) {
-                    var vKernel = FloatVector.fromArray(SPECIES, kernel, j);
-                    var vreds = FloatVector.fromArray(SPECIES, reds, j);
-                    var vgreens = FloatVector.fromArray(SPECIES, greens, j);
-                    var vblues = FloatVector.fromArray(SPECIES, blues, j);
-                    redValue += vreds.mul(vKernel).reduceLanes(VectorOperators.ADD);
-                    greenValue += vgreens.mul(vKernel).reduceLanes(VectorOperators.ADD);
-                    blueValue += vblues.mul(vKernel).reduceLanes(VectorOperators.ADD);
+                for (j = 0; j < kernelUpperBound; j += SPECIES.length()) {
+                    vKernel = FloatVector.fromArray(SPECIES, kernel, j);
+
+                    // Directly extract RGB values and perform calculations
+                    for (int k = j; k < j + SPECIES.length(); k++) {
+                        int pixel = imagePixels[k];
+                        float red = (float) ((pixel >> 16) & 0xFF);
+                        float green = (float) ((pixel >> 8) & 0xFF);
+                        float blue = (float) (pixel & 0xFF);
+
+                        redValue += red * kernel[k];
+                        greenValue += green * kernel[k];
+                        blueValue += blue * kernel[k];
+                    }
                 }
-                for(; j < kernel.length; j++){
-                    redValue += reds[j] * kernel[j];
-                    greenValue += greens[j] * kernel[j];
-                    blueValue += blues[j] * kernel[j];
+
+                // Handle remaining pixels not covered by the vectorized loop
+                for (j = kernelUpperBound; j < kernel.length; j++) {
+                    int pixel = imagePixels[j];
+                    float red = (float) ((pixel >> 16) & 0xFF);
+                    float green = (float) ((pixel >> 8) & 0xFF);
+                    float blue = (float) (pixel & 0xFF);
+
+                    redValue += red * kernel[j];
+                    greenValue += green * kernel[j];
+                    blueValue += blue * kernel[j];
                 }
+
                 int newRGB = (clamp((int) redValue) << 16) | (clamp((int) greenValue) << 8) | clamp((int) blueValue);
                 outputImage.setRGB(x, y, newRGB);
             }
         }
         return outputImage;
+        // for (int x = radius; x < width - radius; x++) {
+        //     for (int y = radius; y < height - radius; y++) {
+        //         var redValue = 0.0f;
+        //         var greenValue = 0.0f;
+        //         var blueValue = 0.0f;
+        //         int[] imagePixels = new int[kernel.length];
+        //         float[] reds = new float[kernel.length];
+        //         float[] greens = new float[kernel.length];
+        //         float[] blues = new float[kernel.length];
+        //         image.getRGB(x - radius, y - radius, kernelWidth, kernelWidth, imagePixels, 0, kernelWidth);
+        //         getColors(imagePixels, reds, greens, blues);
+
+        //         FloatVector vreds;
+        //         FloatVector vgreens;
+        //         FloatVector vblues;
+        //         for(j = 0; j < kernelUpperBound; j+= SPECIES.length()) {
+        //             vKernel = FloatVector.fromArray(SPECIES, kernel, j);
+        //             vreds = FloatVector.fromArray(SPECIES, reds, j);
+        //             vgreens = FloatVector.fromArray(SPECIES, greens, j);
+        //             vblues = FloatVector.fromArray(SPECIES, blues, j);
+        //             redValue += vreds.mul(vKernel).reduceLanes(VectorOperators.ADD);
+        //             greenValue += vgreens.mul(vKernel).reduceLanes(VectorOperators.ADD);
+        //             blueValue += vblues.mul(vKernel).reduceLanes(VectorOperators.ADD);
+        //         }
+        //         for(; j < kernel.length; j++){
+        //             redValue += reds[j] * kernel[j];
+        //             greenValue += greens[j] * kernel[j];
+        //             blueValue += blues[j] * kernel[j];
+        //         }
+        //         int newRGB = (clamp((int) redValue) << 16) | (clamp((int) greenValue) << 8) | clamp((int) blueValue);
+        //         outputImage.setRGB(x, y, newRGB);
+        //     }
+        // }
+        // return outputImage;
     }
 
     private static void getColors(int[] imageArray, float[] reds, float[] greens, float[] blues) {
-        for(int x = 0; x < imageArray.length; x++){
-            for (int i = 0; i < 3; i++) {
-                if(i == 0){
-                    reds[x] = (float)((imageArray[x] >> 16) & 0xFF);
-                } else if(i == 1){
-                    greens[x] = (float)((imageArray[x] >> 8) & 0xFF);
-                } else {
-                    blues[x] = (float)(imageArray[x] & 0xFF);
-                }
-            }
+        for (int x = 0; x < imageArray.length; x++) {
+            int pixel = imageArray[x];
+            reds[x] = (float)((pixel >> 16) & 0xFF);
+            greens[x] = (float)((pixel >> 8) & 0xFF);
+            blues[x] = (float)(pixel & 0xFF);
         }
     }
 
@@ -149,103 +192,39 @@ public class GaussianBlur {
 
         var normalized = vKernelValues.divInPlace(sum);
 
-        float[] test = new float[normalized.length];
-        var vreds = SVMBuffer.fromArray(SPECIES_SVM, test);
-        var vgreens = SVMBuffer.fromArray(SPECIES_SVM, test);
-        var vblues = SVMBuffer.fromArray(SPECIES_SVM, test);
+        var vImagePixels = SVMBuffer.zeroInt(SPECIES_SVM, normalized.length);
 
+        int counter = 0;
         for (int x = radius; x < width - radius; x++) {
             for (int y = radius; y < height - radius; y++) {
                 int[] imagePixels = new int[normalized.length];
-                float[] reds = new float[normalized.length];
-                float[] greens = new float[normalized.length];
-                float[] blues = new float[normalized.length];
                 image.getRGB(x - radius, y - radius, kernelWidth, kernelWidth, imagePixels, 0, kernelWidth);
-                getColors(imagePixels, reds, greens, blues);
 
-                vreds.reuse(reds);
-                vgreens.reuse(greens);
-                vblues.reuse(blues);
+                vImagePixels.fill(imagePixels);
 
-                var redValue = vreds.mulInPlace(normalized).sumReduce();
-                var greenValue = vgreens.mulInPlace(normalized).sumReduce();
-                var blueValue = vblues.mulInPlace(normalized).sumReduce();
+                var vblues = vImagePixels.and(0xFF);
+                var vgreens = vImagePixels.ashrInPlace(8).and(0xFF);
+                var vreds = vImagePixels.ashrInPlace(8).and(0xFF);
+
+                var blueValue = normalized.mulInPlaceInt(vblues).sumReduce();
+                var greenValue = normalized.mulInPlaceInt(vgreens).sumReduce();
+                var redValue = normalized.mulInPlaceInt(vreds).sumReduce();
+
+
+                vblues.releaseSVMBufferInt();
+                vgreens.releaseSVMBufferInt();
+                vreds.releaseSVMBufferInt();
 
                 int newRGB = (clamp((int) redValue) << 16) | (clamp((int) greenValue) << 8) | clamp((int) blueValue);
                 outputImage.setRGB(x, y, newRGB);
             }
+            System.out.println(counter++ + " of " + (width - radius));
         }
-        vreds.releaseSVMBuffer();
-        vgreens.releaseSVMBuffer();
-        vblues.releaseSVMBuffer();
+        vImagePixels.releaseSVMBuffer();
+        normalized.releaseSVMBuffer();
 
         return outputImage;
     }
-
-    // public static BufferedImage blurSerial(int radius, BufferedImage image) {
-    //     int width = image.getWidth();
-    //     int height = image.getHeight();
-    //     BufferedImage outputImage = new BufferedImage(width, height, image.getType());
-
-    //     float sigma = (float)Math.max(radius / 2.0, 1.0);
-    //     int kernelWidth = 2 * radius + 1;
-
-    //     float[] kernel = new float[kernelWidth * kernelWidth];
-    //     float sum = 0.0f;
-
-    //     for (int x = -radius, i = 0; x <= radius; x++) {
-    //         for (int y = -radius; y <= radius; y++, i++) {
-    //             float exponentNumerator = -(x * x + y * y);
-    //             float exponentDenominator = 2 * sigma * sigma;
-
-    //             float eExpression = (float)Math.exp(exponentNumerator / exponentDenominator);
-    //             float kernelValue = eExpression / (2 * (float)Math.PI * sigma * sigma);
-
-    //             kernel[i] = (float) kernelValue;
-    //             sum += kernelValue;
-    //         }
-    //     }
-
-    //     for (int i = 0; i < kernel.length; i++) {
-    //         kernel[i] /= (float) sum;
-    //     }
-
-    //     // printArray(kernel, "Serial");
-
-    //     for (int y = radius; y < /* height -  */radius + 1; y++) {
-    //         for (int x = radius; x < /* width -  */radius + 1; x++) {
-
-    //             float redValue = 0.0f;
-    //             float greenValue = 0.0f;
-    //             float blueValue = 0.0f;
-
-    //             for (int kernelY = -radius, i = 0; kernelY <= radius; kernelY++) {
-    //                 for (int kernelX = -radius; kernelX <= radius; kernelX++, i++) {
-
-    //                     float kernelValue = kernel[i];
-
-    //                     int pixelRGB = image.getRGB(x + kernelX, y + kernelY);
-    //                     int red = (pixelRGB >> 16) & 0xFF;
-    //                     int green = (pixelRGB >> 8) & 0xFF;
-    //                     int blue = pixelRGB & 0xFF;
-
-    //                     redValue += red * kernelValue;
-    //                     greenValue += green * kernelValue;
-    //                     blueValue += blue * kernelValue;
-    //                 }
-    //             }
-
-    //             System.out.println("redValue: " + redValue);
-    //             System.out.println("greenValue: " + greenValue);
-    //             System.out.println("blueValue: " + blueValue);
-
-    //             int newRGB = (clamp((int) redValue) << 16) | (clamp((int) greenValue) << 8) | clamp((int) blueValue);
-    //             outputImage.setRGB(x, y, newRGB);
-    //         }
-    //     }
-
-    //     return outputImage;
-    // }
 
     public static BufferedImage blurSerialWorking(int radius, BufferedImage image) {
         int width = image.getWidth();
@@ -275,8 +254,6 @@ public class GaussianBlur {
             kernel[i] /= (float) sum;
         }
 
-        // printArray(kernel, "Serial");
-
         for (int x = radius; x < width - radius; x++) {
             for (int y = radius; y < height - radius; y++) {
 
@@ -284,22 +261,19 @@ public class GaussianBlur {
                 float greenValue = 0.0f;
                 float blueValue = 0.0f;
 
-                for (int kernelX = -radius, i = 0; kernelX <= radius; kernelX++) {
-                    for (int kernelY = -radius; kernelY <= radius; kernelY++, i++) {
+                int[] imagePixels = new int[kernel.length];
+                image.getRGB(x - radius, y - radius, kernelWidth, kernelWidth, imagePixels, 0, kernelWidth);
 
-                        float kernelValue = kernel[i];
+                for (int j = 0; j < kernel.length; j++) {
+                    int pixel = imagePixels[j];
+                    float red = (float) ((pixel >> 16) & 0xFF);
+                    float green = (float) ((pixel >> 8) & 0xFF);
+                    float blue = (float) (pixel & 0xFF);
 
-                        int pixelRGB = image.getRGB(x + kernelX, y + kernelY);
-                        int red = (pixelRGB >> 16) & 0xFF;
-                        int green = (pixelRGB >> 8) & 0xFF;
-                        int blue = pixelRGB & 0xFF;
-
-                        redValue += red * kernelValue;
-                        greenValue += green * kernelValue;
-                        blueValue += blue * kernelValue;
-                    }
+                    redValue += red * kernel[j];
+                    greenValue += green * kernel[j];
+                    blueValue += blue * kernel[j];
                 }
-                // System.out.println(redValue);
 
                 int newRGB = (clamp((int) redValue) << 16) | (clamp((int) greenValue) << 8) | clamp((int) blueValue);
                 outputImage.setRGB(x, y, newRGB);

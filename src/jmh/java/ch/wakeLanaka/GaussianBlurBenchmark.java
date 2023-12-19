@@ -13,7 +13,7 @@ public class GaussianBlurBenchmark {
     @State(Scope.Thread)
     public static class BenchmarkSetup {
 
-        @Param({"11"})
+        @Param({"5"})
         public int radius;
         public BufferedImage input;
         public BufferedImage output;
@@ -76,8 +76,8 @@ public class GaussianBlurBenchmark {
     //     state.output = GaussianBlur.blurAVX(state.radius, state.ys, state.input);
     //     // System.out.println("---SERIAL---");
     //     // state.output = GaussianBlur.blurSerial(state.radius, state.input);
-    //     File outputfile = new File("/home/reto/Pictures/blured.png");
-    //     ImageIO.write(state.output, "png", outputfile);
-    //     System.out.println("Created!");
+    //     // File outputfile = new File("/home/reto/Pictures/blured.png");
+    //     // ImageIO.write(state.output, "png", outputfile);
+    //     // System.out.println("Created!");
     // }
 }
