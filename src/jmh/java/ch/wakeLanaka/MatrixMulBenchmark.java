@@ -14,7 +14,7 @@ public class MatrixMulBenchmark {
 
     @State(Scope.Thread)
     public static class BenchmarkSetup {
-        @Param({"64","1024", "4096", "16384", "32768", "65536"})
+        @Param({"64" ,"1024", "4096", "16384", "32768", "65536"})
         int size;
 
         private float[] left;
@@ -46,26 +46,27 @@ public class MatrixMulBenchmark {
     }
 
     @Benchmark
-    public void MatrixMulSVMWithCopy(Blackhole bh, BenchmarkSetup state){
-        var vleft = SVMBuffer.fromArray(SPECIES_SVM, state.left);
-        var vright = SVMBuffer.fromArray(SPECIES_SVM, state.right);
-        var vresult = SVMBuffer.fromArray(SPECIES_SVM, state.result);
-        bh.consume(MatrixMul.computeSVM(vleft, vright, vresult, state.size));
-        vresult.intoArray(state.result);
-    }
-
-    @Benchmark
     public void MatrixMulSVM(Blackhole bh, BenchmarkSetup state){
         bh.consume(MatrixMul.computeSVM(state.leftBuf, state.rightBuf, state.resultBuf, state.size));
     }
 
-    @Benchmark
-    public void MatrixMulSVMNormal(Blackhole bh, BenchmarkSetup state){
-        bh.consume(MatrixMul.computeSVMNormal(state.left, state.right, state.size, SPECIES_SVM));
-    }
+    // @Benchmark
+    // public void MatrixMulSVMNormal(Blackhole bh, BenchmarkSetup state){
+    //     bh.consume(MatrixMul.computeSVMNormal(state.left, state.right, state.size, SPECIES_SVM));
+    // }
 
-    @Benchmark
-    public void MatrixMulSVMRange(Blackhole bh, BenchmarkSetup state){
-        bh.consume(MatrixMul.computeSVMRange(state.leftBuf, state.rightBuf, state.size));
-    }
+    // @Benchmark
+    // public void MatrixMulSVMWithCopy(Blackhole bh, BenchmarkSetup state){
+    //     var vleft = SVMBuffer.fromArray(SPECIES_SVM, state.left);
+    //     var vright = SVMBuffer.fromArray(SPECIES_SVM, state.right);
+    //     var vresult = SVMBuffer.fromArray(SPECIES_SVM, state.result);
+    //     bh.consume(MatrixMul.computeSVM(vleft, vright, vresult, state.size));
+    //     vresult.intoArray(state.result);
+    // }
+
+
+    // @Benchmark
+    // public void MatrixMulSVMRange(Blackhole bh, BenchmarkSetup state){
+    //     bh.consume(MatrixMul.computeSVMRange(state.leftBuf, state.rightBuf, state.size));
+    // }
 }

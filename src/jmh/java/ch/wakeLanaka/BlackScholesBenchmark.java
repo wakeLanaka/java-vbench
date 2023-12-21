@@ -78,9 +78,9 @@ public class BlackScholesBenchmark {
 
     @Benchmark
     @BenchmarkMode(Mode.AverageTime)
-    // @Fork(1)
-    public void blackScholesJava(BenchmarkSetup state){
-        BlackScholes.computeJava(state.sig, state.r, state.x, state.call, state.put, state.t, state.s0, state.size, 0);
+    @Fork(1)
+    public void blackScholesSerial(BenchmarkSetup state){
+        BlackScholes.computeSerial(state.sig, state.r, state.x, state.call, state.put, state.t, state.s0, state.size, 0);
     }
 
     @Benchmark
@@ -89,33 +89,34 @@ public class BlackScholesBenchmark {
     public void blackScholesAVX(BenchmarkSetup state){
         int offset = BlackScholes.computeAVX(state.sig, state.r, state.x, state.call, state.put, state.t, state.s0);
         for (int i = offset; i < state.size; i++){
-            BlackScholes.computeJava(state.sig, state.r, state.x, state.call, state.put, state.t, state.s0, state.size, offset);
+            BlackScholes.computeSerial(state.sig, state.r, state.x, state.call, state.put, state.t, state.s0, state.size, offset);
         }
     }
 
     @Benchmark
     @BenchmarkMode(Mode.AverageTime)
-    public void blackScholesSVMWithCopy(BenchmarkSetup state){
-        var xBuf = SVMBuffer.fromArray(SPECIES_SVM, state.x);
-        var callBuf = SVMBuffer.fromArray(SPECIES_SVM, state.call);
-        var putBuf = SVMBuffer.fromArray(SPECIES_SVM, state.put);
-        var tBuf = SVMBuffer.fromArray(SPECIES_SVM, state.t);
-        var s0Buf = SVMBuffer.fromArray(SPECIES_SVM, state.s0);
-        var sigBuf = SVMBuffer.broadcast(SPECIES_SVM, state.sig, state.size);
-        var rBuf = SVMBuffer.broadcast(SPECIES_SVM, state.r, state.size);
-        var negrBuf = SVMBuffer.broadcast(SPECIES_SVM, -state.r, state.size);
-
-        BlackScholes.computeSVM(sigBuf, rBuf, negrBuf, xBuf, callBuf, putBuf, tBuf, s0Buf);
-
-        callBuf.intoArray(state.call);
-        putBuf.intoArray(state.put);
-    }
-
-    @Benchmark
-    @BenchmarkMode(Mode.AverageTime)
     public void blackScholesSVM(BenchmarkSetup state){
-        BlackScholes.computeSVM(state.sigBuf, state.rBuf, state.negrBuf, state.xBuf, state.callBuf, state.putBuf, state.tBuf, state.s0Buf);
+        BlackScholes.computeSVM(state.sigBuf, state.rBuf, state.negrBuf, state.xBuf, state.call, state.call, state.tBuf, state.s0Buf);
     }
+
+    // @Benchmark
+    // @BenchmarkMode(Mode.AverageTime)
+    // public void blackScholesSVMWithCopy(BenchmarkSetup state){
+    //     var xBuf = SVMBuffer.fromArray(SPECIES_SVM, state.x);
+    //     var callBuf = SVMBuffer.fromArray(SPECIES_SVM, state.call);
+    //     var putBuf = SVMBuffer.fromArray(SPECIES_SVM, state.put);
+    //     var tBuf = SVMBuffer.fromArray(SPECIES_SVM, state.t);
+    //     var s0Buf = SVMBuffer.fromArray(SPECIES_SVM, state.s0);
+    //     var sigBuf = SVMBuffer.broadcast(SPECIES_SVM, state.sig, state.size);
+    //     var rBuf = SVMBuffer.broadcast(SPECIES_SVM, state.r, state.size);
+    //     var negrBuf = SVMBuffer.broadcast(SPECIES_SVM, -state.r, state.size);
+
+    //     BlackScholes.computeSVM(sigBuf, rBuf, negrBuf, xBuf, callBuf, putBuf, tBuf, s0Buf);
+
+    //     callBuf.intoArray(state.call);
+    //     putBuf.intoArray(state.put);
+    // }
+
 
     // @Benchmark
     // @BenchmarkMode(Mode.AverageTime)
@@ -123,35 +124,35 @@ public class BlackScholesBenchmark {
     //     BlackScholes.computeOpenCL(state.sig, state.r, state.xBuf, state.callBuf, state.putBuf, state.tBuf, state.s0Buf);
     // }
 
-    @Benchmark
-    @BenchmarkMode(Mode.AverageTime)
-    public void blackScholesOpenCLWithCopy(BenchmarkSetup state){
-        var xBuf = SVMBuffer.fromArray(SPECIES_SVM, state.x);
-        var callBuf = SVMBuffer.fromArray(SPECIES_SVM, state.call);
-        var putBuf = SVMBuffer.fromArray(SPECIES_SVM, state.put);
-        var tBuf = SVMBuffer.fromArray(SPECIES_SVM, state.t);
-        var s0Buf = SVMBuffer.fromArray(SPECIES_SVM, state.s0);
+    // @Benchmark
+    // @BenchmarkMode(Mode.AverageTime)
+    // public void blackScholesOpenCLWithCopy(BenchmarkSetup state){
+    //     var xBuf = SVMBuffer.fromArray(SPECIES_SVM, state.x);
+    //     var callBuf = SVMBuffer.fromArray(SPECIES_SVM, state.call);
+    //     var putBuf = SVMBuffer.fromArray(SPECIES_SVM, state.put);
+    //     var tBuf = SVMBuffer.fromArray(SPECIES_SVM, state.t);
+    //     var s0Buf = SVMBuffer.fromArray(SPECIES_SVM, state.s0);
 
-        BlackScholes.computeOpenCL(state.sig, state.r, xBuf, callBuf, putBuf, tBuf, s0Buf);
+    //     BlackScholes.computeOpenCL(state.sig, state.r, xBuf, callBuf, putBuf, tBuf, s0Buf);
 
-        callBuf.intoArray(state.call);
-        putBuf.intoArray(state.put);
-    }
+    //     callBuf.intoArray(state.call);
+    //     putBuf.intoArray(state.put);
+    // }
 
-    @Benchmark
-    @BenchmarkMode(Mode.AverageTime)
-    public void blackScholesKernelBuilderWithCopy(BenchmarkSetup state){
-        var vx = SVMBuffer.fromArray(SPECIES_SVM, state.x);
-        var vcall = SVMBuffer.fromArray(SPECIES_SVM, state.call);
-        var vput = SVMBuffer.fromArray(SPECIES_SVM, state.put);
-        var vt = SVMBuffer.fromArray(SPECIES_SVM, state.t);
-        var vs0 = SVMBuffer.fromArray(SPECIES_SVM, state.s0);
+    // @Benchmark
+    // @BenchmarkMode(Mode.AverageTime)
+    // public void blackScholesKernelBuilderWithCopy(BenchmarkSetup state){
+    //     var vx = SVMBuffer.fromArray(SPECIES_SVM, state.x);
+    //     var vcall = SVMBuffer.fromArray(SPECIES_SVM, state.call);
+    //     var vput = SVMBuffer.fromArray(SPECIES_SVM, state.put);
+    //     var vt = SVMBuffer.fromArray(SPECIES_SVM, state.t);
+    //     var vs0 = SVMBuffer.fromArray(SPECIES_SVM, state.s0);
 
-        BlackScholes.computeKernelBuilder(state.sig, state.r, vx, vcall, vput, vt, vs0);
+    //     BlackScholes.computeKernelBuilder(state.sig, state.r, vx, vcall, vput, vt, vs0);
 
-        vcall.intoArray(state.call);
-        vput.intoArray(state.put);
-    }
+    //     vcall.intoArray(state.call);
+    //     vput.intoArray(state.put);
+    // }
 
     // @Benchmark
     // @BenchmarkMode(Mode.AverageTime)

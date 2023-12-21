@@ -49,7 +49,7 @@ public class BlackScholes {
             return part1 * part2;
     }
 
-    public static void computeJava(float sig, float r, float[] x, float[] call, float[] put, float[] t, float[] s0, int size, int offset){
+    public static void computeSerial(float sig, float r, float[] x, float[] call, float[] put, float[] t, float[] s0, int size, int offset){
         float sig_sq_by2 = 0.5f * sig * sig;
         for (int i = offset; i < size; i++ ) {
             float log_s0byx = (float)Math.log(s0[i] / x[i]);
@@ -57,10 +57,8 @@ public class BlackScholes {
             float exp_neg_rt = (float)Math.exp(-r * t[i]);
             float d1 = (log_s0byx + (r + sig_sq_by2) * t[i])/(sig_sqrt_t);
             float d2 = d1 - sig_sqrt_t;
-            if(i == 0 || i == 1023){
-                call[i] = s0[i] * cdf(d1) - exp_neg_rt * x[i] * cdf(d2);
-                put[i]  = call[i] + exp_neg_rt - s0[i];
-            }
+            call[i] = s0[i] * cdf(d1) - exp_neg_rt * x[i] * cdf(d2);
+            put[i]  = call[i] + exp_neg_rt - s0[i];
        }
     }
 
@@ -128,15 +126,17 @@ public class BlackScholes {
         return vresult;
     }
 
-    public static void computeSVM(SVMBuffer vsig, SVMBuffer vr, SVMBuffer vnegr, SVMBuffer vx, SVMBuffer vcall, SVMBuffer vput, SVMBuffer vt, SVMBuffer vs0){
+    public static void computeSVM(SVMBuffer vsig, SVMBuffer vr, SVMBuffer vnegr, SVMBuffer vx, float[] call, float[] put, SVMBuffer vt, SVMBuffer vs0){
         var vsig_sq_by2 = vsig.mul(vsig).mulInPlace(0.5f);
         var vlog_s0byx = vs0.div(vx).logInPlace();
         var vsig_sqrt_t = vt.sqrt().mulInPlace(vsig);
         var vexp_neg_rt = vt.mul(vnegr).expInPlace();
         var vd1 = vsig_sq_by2.addInPlace(vr).mulInPlace(vt).addInPlace(vlog_s0byx).divInPlace(vsig_sqrt_t);
         var vd2 = vd1.sub(vsig_sqrt_t);
-        vcall = vs0.mul(svmcdf(vd1)).subInPlace(vx.mulInPlace(vexp_neg_rt).mulInPlace(svmcdf(vd2)));
-        vput = vcall.add(vexp_neg_rt).subInPlace(vs0);
+        var vcall = vs0.mul(svmcdf(vd1)).subInPlace(vx.mulInPlace(vexp_neg_rt).mulInPlace(svmcdf(vd2)));
+        var vput = vcall.add(vexp_neg_rt).subInPlace(vs0);
+        vcall.intoArray(call);
+        vput.intoArray(put);
     }
 
     public static void computeOpenCL(float sig, float r, SVMBuffer x, SVMBuffer call, SVMBuffer put, SVMBuffer t, SVMBuffer s0){

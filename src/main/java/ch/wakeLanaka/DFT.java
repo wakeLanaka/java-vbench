@@ -23,8 +23,8 @@ public class DFT {
             float sumimag = 0;
             for(int t = 0; t < n; t++){
                 float angle = twoPI * t * k / n;
-                sumreal += (inReal[t] * Math.cos(angle)) + (inImag[t] * Math.sin(angle));
-                sumimag += -(inReal[t] * (float)Math.sin(angle)) + inImag[t] * Math.cos(angle);
+                sumreal += (inReal[t] * (float)Math.cos(angle)) + (inImag[t] * (float)Math.sin(angle));
+                sumimag += -(inReal[t] * (float)Math.sin(angle)) + (inImag[t] * (float)Math.cos(angle));
             }
             outReal[k] = sumreal;
             outImag[k] = sumimag;
@@ -38,13 +38,19 @@ public class DFT {
         for(int k = 0; k < n; k++){
             float sumReal = 0;
             float sumImag = 0;
-            for (int i = 0; i <= inReal.length - fsp.length(); i += fsp.length()) {
+            int i = 0;
+            for (i = 0; i <= inReal.length - fsp.length(); i += fsp.length()) {
                 var vt = FloatVector.fromArray(fsp, t, i);
                 var vinReal = FloatVector.fromArray(fsp, inReal, i);
                 var vinImag = FloatVector.fromArray(fsp, inImag, i);
                 var angle = vt.mul(k).mul(twoPI).div(n);
                 sumReal += angle.lanewise(VectorOperators.COS).mul(vinReal).add(vinImag.mul(angle.lanewise(VectorOperators.SIN))).reduceLanes(VectorOperators.ADD);
                 sumImag += angle.lanewise(VectorOperators.SIN).mul(vinReal).neg().add(vinImag.mul(angle.lanewise(VectorOperators.COS))).reduceLanes(VectorOperators.ADD);
+            }
+            for(; i < n; i++){
+                float angle = twoPI * i * k / n;
+                sumReal += (inReal[i] * (float)Math.cos(angle)) + (inImag[i] * (float)Math.sin(angle));
+                sumImag += -(inReal[i] * (float)Math.sin(angle)) + (inImag[i] * (float)Math.cos(angle));
             }
             outReal[k] = sumReal;
             outImag[k] = sumImag;

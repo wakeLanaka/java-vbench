@@ -30,11 +30,15 @@ public class MatrixMul {
             for (int k = 0; k < n; k++) {
                 float aik = a[i * n + k];
                 FloatVector vaik = FloatVector.broadcast(SPECIES, aik);
-                for (int j = 0; j < upperBound; j += SPECIES.length()) {
+                int j = 0;
+                for (; j < upperBound; j += SPECIES.length()) {
                     FloatVector vb = FloatVector.fromArray(SPECIES, b, k * n + j);
                     FloatVector vc = FloatVector.fromArray(SPECIES, c, i * n + j);
                     vc = vaik.fma(vb, vc);
                     vc.intoArray(c, i * n + j);
+                }
+                for (; j < n; j++) {
+                    c[i * n + j] = Math.fma(aik, b[k * n + j], c[i * n + j]);
                 }
             }
         }
@@ -48,21 +52,9 @@ public class MatrixMul {
         return c;
     }
 
-    public static float[] computeSVMRange(SVMBuffer a, SVMBuffer b, int n) {
-        float[] c = new float[n*n];
-
-        for(int i = 0; i < n; i++){
-            for(int k = 0; k < n; k++){
-                var res = a.mulRange(i * n, b, k * n, n);
-                c[i * n + k] = a.sumReduce();
-                res.releaseSVMBuffer();
-            }
-        }
-        return c;
-    }
-
     public static float[] computeSVMNormal(float[] a, float[] b, int n, GPUInformation species) {
         float[] c = new float[n*n];
+        float[] d = new float[n];
         SVMBuffer[] cacheA = new SVMBuffer[n];
         SVMBuffer[] cacheB = new SVMBuffer[n];
 
