@@ -56,7 +56,7 @@ public class DFTBenchmark {
             iotaT.releaseSVMBuffer();
         }
 
-        @TearDonw(Level.Trial)
+        @TearDown(Level.Trial)
         public void doTearDownTrial(){
             inRealBuf.releaseSVMBuffer();
             inImagBuf.releaseSVMBuffer();
