@@ -50,10 +50,16 @@ public class DFTBenchmark {
         }
 
         @TearDown(Level.Invocation)
-        public void doTearDown(){
+        public void doTearDownInvocation(){
             outRealBuf.releaseSVMBuffer();
             outImagBuf.releaseSVMBuffer();
             iotaT.releaseSVMBuffer();
+        }
+
+        @TearDonw(Level.Trial)
+        public void doTearDownTrial(){
+            inRealBuf.releaseSVMBuffer();
+            inImagBuf.releaseSVMBuffer();
         }
     }
 

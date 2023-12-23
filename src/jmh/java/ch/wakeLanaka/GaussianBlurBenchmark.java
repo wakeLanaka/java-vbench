@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import javax.imageio.ImageIO;
 import org.openjdk.jmh.annotations.*;
-
+import static ch.wakeLanaka.GeneratorHelpers.createRadiusValues;
 
 public class GaussianBlurBenchmark {
 
@@ -16,68 +16,56 @@ public class GaussianBlurBenchmark {
         @Param({"5"})
         public int radius;
         public BufferedImage input;
-        public BufferedImage output;
         public float[] ys;
+        public int[] outputPixels;
 
         @Setup(Level.Trial)
         public void doSetup() throws Exception {
-            var path = Paths.get("/home/reto/Pictures/Wallpapers/japan_store.png");
+            var absolutePath = new File(".").getAbsolutePath();
+            var path = Paths.get(absolutePath + "/src/jmh/java/ch/wakeLanaka/img/benchmark.png");
             File file = path.toFile().getAbsoluteFile();
+
             if (file.exists()){
                 input = ImageIO.read(file);
             } else {
                 throw new IOException("File (" + path + ") does not exist!");
             }
 
-            ys = new float[radius * 2 + 1];
-            int x = 0;
-            for(int i = -radius; i <= radius; i++) {
-                ys[x] = (float)i;
-                x++;
-            }
+            ys = createRadiusValues(radius);
         }
 
         @TearDown(Level.Trial)
         public void doTearDown() throws Exception {
-            System.out.println("1");
-            File outputfile = new File("/home/reto/Pictures/blured.png");
-            System.out.println("2");
-            ImageIO.write(output, "png", outputfile);
+            int width = input.getWidth();
+            int height = input.getHeight();
+            int resultWidth = width - 2 * radius;
+            int resultHeight = height - 2 * radius;
+            int resultelements = resultWidth * resultHeight;
+            BufferedImage outputImage = new BufferedImage(width, height, input.getType());
+            outputImage.setRGB(radius, radius, resultWidth, resultHeight, outputPixels, 0, resultWidth);
+            var absolutePath = new File(".").getAbsolutePath();
+            var outputPath = Paths.get(absolutePath + "/src/jmh/java/ch/wakeLanaka/img/benchmarkBlurred.png");
+            File outputfile = new File(outputPath.toString());
+            ImageIO.write(outputImage, "png", outputfile);
+            System.out.println("Image created! at " + outputPath);
         }
     }
 
-    // @Benchmark
-    // @BenchmarkMode(Mode.AverageTime)
-    // public void gaussianBlurSerial(BenchmarkSetup state) {
-    //     state.output = GaussianBlur.blurSerial(state.radius, state.input);
-    // }
-
-    // @Benchmark
-    // @BenchmarkMode(Mode.AverageTime)
-    // public void gaussianBlurSerial(BenchmarkSetup state) throws Exception {
-    //     state.output = GaussianBlur.blurSerialWorking(state.radius, state.input);
-    //     // File outputfile = new File("/home/reto/Pictures/blured.png");
-    //     // ImageIO.write(state.output, "png", outputfile);
-    //     // System.out.println("Created!");
-    // }
+    @Benchmark
+    @BenchmarkMode(Mode.AverageTime)
+    public void gaussianBlurSerial(BenchmarkSetup state) {
+        state.outputPixels = GaussianBlur.blurSerial(state.radius, state.input);
+    }
 
     @Benchmark
     @BenchmarkMode(Mode.AverageTime)
-    public void gaussianBlurSVM(BenchmarkSetup state) throws Exception {
-        state.output = GaussianBlur.blurSVM(state.radius, state.ys, state.ys, state.input);
-        File outputfile = new File("/home/reto/Pictures/blured.png");
-        ImageIO.write(state.output, "png", outputfile);
-        System.out.println("Created!");
+    public void gaussianBlurSVMFast(BenchmarkSetup state) throws Exception {
+        state.outputPixels = GaussianBlur.blurSVMFast(state.radius, state.ys, state.input);
     }
 
-    // @Benchmark
-    // @BenchmarkMode(Mode.AverageTime)
-    // public void TEST(BenchmarkSetup state) throws Exception {
-    //     state.output = GaussianBlur.blurAVX(state.radius, state.ys, state.input);
-    //     // System.out.println("---SERIAL---");
-    //     // state.output = GaussianBlur.blurSerial(state.radius, state.input);
-    //     // File outputfile = new File("/home/reto/Pictures/blured.png");
-    //     // ImageIO.write(state.output, "png", outputfile);
-    //     // System.out.println("Created!");
-    // }
+    @Benchmark
+    @BenchmarkMode(Mode.AverageTime)
+    public void gaussianBlurAVX(BenchmarkSetup state) throws Exception {
+        state.outputPixels = GaussianBlur.blurAVX(state.radius, state.ys, state.input);
+    }
 }

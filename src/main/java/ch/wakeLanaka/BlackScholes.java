@@ -25,7 +25,7 @@ public class BlackScholes {
     private static float cdf(float inp) {
         float x = inp;
         if (inp < 0f) {
-            x = -inp; 
+            x = -inp;
         }
 
 
@@ -51,12 +51,12 @@ public class BlackScholes {
 
     public static void computeSerial(float sig, float r, float[] x, float[] call, float[] put, float[] t, float[] s0, int size, int offset){
         float sig_sq_by2 = 0.5f * sig * sig;
-        for (int i = offset; i < size; i++ ) {
+        for (int i = offset; i < size; i++) {
             float log_s0byx = (float)Math.log(s0[i] / x[i]);
             float sig_sqrt_t = sig * (float)Math.sqrt(t[i]);
             float exp_neg_rt = (float)Math.exp(-r * t[i]);
             float d1 = (log_s0byx + (r + sig_sq_by2) * t[i])/(sig_sqrt_t);
-            float d2 = d1 - sig_sqrt_t;
+            float d2 = (log_s0byx + (r - sig_sq_by2) * t[i])/(sig_sqrt_t);
             call[i] = s0[i] * cdf(d1) - exp_neg_rt * x[i] * cdf(d2);
             put[i]  = call[i] + exp_neg_rt - s0[i];
        }

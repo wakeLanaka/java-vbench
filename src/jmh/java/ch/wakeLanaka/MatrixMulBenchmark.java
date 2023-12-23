@@ -24,14 +24,21 @@ public class MatrixMulBenchmark {
         private SVMBuffer rightBuf;
         private SVMBuffer resultBuf;
 
-        @Setup(Level.Iteration)
-        public void init() {
-            this.left = newFloatRowMajorMatrix(size * size);
-            this.right = newFloatRowMajorMatrix(size * size);
-            this.leftBuf = SVMBuffer.fromArray(SPECIES_SVM, this.left);
-            this.rightBuf = SVMBuffer.fromArray(SPECIES_SVM, this.right);
-            this.result = new float[size * size];
-            this.resultBuf = SVMBuffer.fromArray(SPECIES_SVM, result);
+        @Setup(Level.Trial)
+        public void doSetup() {
+            left = newFloatRowMajorMatrix(size * size);
+            right = newFloatRowMajorMatrix(size * size);
+            leftBuf = SVMBuffer.fromArray(SPECIES_SVM, this.left);
+            rightBuf = SVMBuffer.fromArray(SPECIES_SVM, this.right);
+            result = new float[size * size];
+            resultBuf = SVMBuffer.fromArray(SPECIES_SVM, result);
+        }
+
+        @TearDown(Level.Trial)
+        public void doTearDown(){
+            leftBuf.releaseSVMBuffer();
+            rightBuf.releaseSVMBuffer();
+            resultBuf.releaseSVMBuffer();
         }
     }
 

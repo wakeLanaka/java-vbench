@@ -4,6 +4,16 @@ public class GeneratorHelpers {
 
     private static float value = 0.25f;
 
+    public static float[] createRadiusValues(int radius){
+        float[] values = new float[radius * 2 + 1];
+        int x = 0;
+        for(int i = -radius; i <= radius; i++) {
+            values[x] = (float)i;
+            x++;
+        }
+        return values;
+    }
+
     public static float[] initFloatArray(int length){
         var floatArray = new float[length];
 
