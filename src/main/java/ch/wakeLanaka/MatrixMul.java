@@ -7,6 +7,7 @@ import jdk.incubator.vector.SVMBuffer;
 
 public class MatrixMul {
     private static final VectorSpecies<Float> SPECIES = FloatVector.SPECIES_PREFERRED;
+    private static final GPUInformation SPECIES_SVM = SVMBuffer.SPECIES_PREFERRED;
 
     public static float[] computeSerial(float[] a, float[] b, int n) {
         float[] c = new float[n * n];
@@ -52,22 +53,36 @@ public class MatrixMul {
         return c;
     }
 
-    public static float[] computeSVMNormal(float[] a, float[] b, int n, GPUInformation species) {
+    public static float[] computeSVMNormal(float[] a, float[] b, int n) {
         float[] c = new float[n*n];
         float[] d = new float[n];
         SVMBuffer[] cacheA = new SVMBuffer[n];
         SVMBuffer[] cacheB = new SVMBuffer[n];
 
         for (int i = 0; i < n; i++) {
-            cacheA[i] = SVMBuffer.fromArray(species, a, i * n, n);
-            cacheB[i] = SVMBuffer.fromArray(species, b, i * n, n);
+            cacheA[i] = SVMBuffer.fromArray(SPECIES_SVM, a, i * n, n);
+            cacheB[i] = SVMBuffer.fromArray(SPECIES_SVM, b, i * n, n);
         }
+        int counter = 0;
         for(int i = 0; i < n; i++){
             for(int k = 0; k < n; k++){
                 var res = cacheA[i].mul(cacheB[k]);
                 c[i * n + k] = res.sumReduce();
                 res.releaseSVMBuffer();
             }
+            cacheA[i].releaseSVMBuffer();
+        }
+        return c;
+    }
+
+    public static float[] computeSVMMatrix(SVMBuffer va, float[] b, int n){
+        float[] c = new float[n * n];
+        for (int i = 0; i < n; i++) {
+            var vb = SVMBuffer.fromArray(SPECIES_SVM, b, i * n, n);
+            var vc = va.mulVector(vb);
+            vc.intoArray(c, i * n, n);
+            vb.releaseSVMBuffer();
+            vc.releaseSVMBuffer();
         }
         return c;
     }

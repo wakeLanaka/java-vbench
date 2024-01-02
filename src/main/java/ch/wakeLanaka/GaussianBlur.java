@@ -13,18 +13,6 @@ public class GaussianBlur {
     private static VectorSpecies<Float> SPECIES = FloatVector.SPECIES_PREFERRED;
     private static GPUInformation SPECIES_SVM = SVMBuffer.SPECIES_PREFERRED;
 
-    private static void printArray(float[] array, String info){
-        for(int i = 0; i < array.length; i++){
-            System.out.println(info + ": " + array[i]);
-        }
-    }
-
-    private static void printArray(int[] array, String info){
-        for(int i = 0; i < 50; i++){
-            System.out.println(info + ": " + array[i]);
-        }
-    }
-
     public static int[] blurAVX(int radius, float[] ys, BufferedImage image) {
         int width = image.getWidth();
         int height = image.getHeight();
@@ -183,8 +171,8 @@ public class GaussianBlur {
         var colors = shiftedRed.or(shiftedGreen).orInPlace(vbInt);
         int[] outputPixels = new int[colors.length];
         colors.intoArray(outputPixels);
-        // BufferedImage outputImage = new BufferedImage(width, height, image.getType());
-        // outputImage.setRGB(radius, radius, resultWidth, resultHeight, outputPixels, 0, resultWidth);
+        BufferedImage outputImage = new BufferedImage(width, height, image.getType());
+        outputImage.setRGB(radius, radius, resultWidth, resultHeight, outputPixels, 0, resultWidth);
 
         vy.releaseSVMBuffer();
         vx.releaseSVMBuffer();

@@ -12,7 +12,7 @@ public class DFTBenchmark {
     @State(Scope.Thread)
     public static class BenchmarkSetup{
 
-        @Param({"64","1024", "4096", "16384", "32768", "65536"})
+        @Param({"8192", "16384", "32768", "65536", "131072"})
         public int size;
         public float[] inReal;
         public float[] inImag;
@@ -69,26 +69,29 @@ public class DFTBenchmark {
         DFT.computeSVM(state.inRealBuf, state.outReal, state.outRealBuf, state.outImag, state.iotaT);
     }
 
-    @Benchmark
-    @BenchmarkMode(Mode.AverageTime)
-    public void DFTAVX(BenchmarkSetup state){
-        DFT.computeAVX(state.inReal, state.outReal, state.inImag, state.outImag, state.t);
-    }
-
-    @Benchmark
-    @BenchmarkMode(Mode.AverageTime)
-    public void DFTSerial(BenchmarkSetup state){
-        DFT.computeSerial(state.inReal, state.outReal, state.inImag, state.outImag);
-    }
+    // @Benchmark
+    // @BenchmarkMode(Mode.AverageTime)
+    // public void DFTAVX(BenchmarkSetup state){
+    //     DFT.computeAVX(state.inReal, state.outReal, state.inImag, state.outImag, state.t);
+    // }
 
     // @Benchmark
     // @BenchmarkMode(Mode.AverageTime)
-    // public void DFTSVMWithCopy(BenchmarkSetup state){
-    //     var inRealBuf = SVMBuffer.fromArray(SPECIES_SVM, state.inReal);
-    //     var inImagBuf = SVMBuffer.fromArray(SPECIES_SVM, state.inImag);
-    //     var iotaT = SVMBuffer.fromArray(SPECIES_SVM, state.t);
-    //     DFT.computeSVM(inRealBuf, state.outReal, inImagBuf, state.outImag, iotaT);
+    // public void DFTSerial(BenchmarkSetup state){
+    //     DFT.computeSerial(state.inReal, state.outReal, state.inImag, state.outImag);
     // }
+
+    @Benchmark
+    @BenchmarkMode(Mode.AverageTime)
+    public void DFTSVMWithCopy(BenchmarkSetup state){
+        var inRealBuf = SVMBuffer.fromArray(SPECIES_SVM, state.inReal);
+        var inImagBuf = SVMBuffer.fromArray(SPECIES_SVM, state.inImag);
+        var iotaT = SVMBuffer.fromArray(SPECIES_SVM, state.t);
+        DFT.computeSVM(inRealBuf, state.outReal, inImagBuf, state.outImag, iotaT);
+        inRealBuf.releaseSVMBuffer();
+        inImagBuf.releaseSVMBuffer();
+        iotaT.releaseSVMBuffer();
+    }
 
     // @Benchmark
     // @BenchmarkMode(Mode.AverageTime)

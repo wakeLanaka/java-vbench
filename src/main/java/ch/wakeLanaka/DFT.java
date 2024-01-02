@@ -23,8 +23,8 @@ public class DFT {
             float sumimag = 0;
             for(int t = 0; t < n; t++){
                 float angle = twoPI * t * k / n;
-                sumreal += (inReal[t] * (float)Math.cos(angle)) + (inImag[t] * (float)Math.sin(angle));
-                sumimag += -(inReal[t] * (float)Math.sin(angle)) + (inImag[t] * (float)Math.cos(angle));
+                sumreal += inReal[t] * (float)Math.cos(angle) + (inImag[t] * (float)Math.sin(angle));
+                sumimag += -inReal[t] * (float)Math.sin(angle) + (inImag[t] * (float)Math.cos(angle));
             }
             outReal[k] = sumreal;
             outImag[k] = sumimag;

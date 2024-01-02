@@ -13,7 +13,7 @@ public class GaussianBlurBenchmark {
     @State(Scope.Thread)
     public static class BenchmarkSetup {
 
-        @Param({"5"})
+        @Param({"8", "10", "12", "14"})
         public int radius;
         public BufferedImage input;
         public float[] ys;

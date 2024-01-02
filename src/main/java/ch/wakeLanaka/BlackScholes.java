@@ -21,13 +21,14 @@ public class BlackScholes {
     static final float A4 = -1.821255978f;
     static final float A5 = 1.330274429f;
     static final float PI = (float)Math.PI;
+    static final float ONE = 1.0f;
+    static final float TWO = 2.0f;
 
     private static float cdf(float inp) {
         float x = inp;
         if (inp < 0f) {
             x = -inp;
         }
-
 
         float term = 1f / (1f + (Y * x));
         float term_pow2 = term * term;
@@ -107,7 +108,6 @@ public class BlackScholes {
 
 
     private static SVMBuffer svmcdf(SVMBuffer vinp) {
-        float[] help = new float[vinp.length];
         var vx = vinp.abs();
         var vone = SVMBuffer.broadcast(SPECIES_SVM, 1.0f, vinp.length);
         var vtwo = SVMBuffer.broadcast(SPECIES_SVM, 2.0f, vinp.length);
@@ -116,6 +116,7 @@ public class BlackScholes {
         var vterm_pow3 = vterm_pow2.mul(vterm);
         var vterm_pow4 = vterm_pow2.mul(vterm_pow2);
         var vterm_pow5 = vterm_pow2.mul(vterm_pow3);
+
         var vpart1 = vone.div(vtwo.mulInPlace(PI).sqrtInPlace()).mulInPlace(vx.mulInPlace(vx).mulInPlace(-1.0f).mulInPlace(0.5f).expInPlace());
         var vpart2 = vterm.mulInPlace(A1).addInPlace(vterm_pow2.mulInPlace(A2)).addInPlace(vterm_pow3.mulInPlace(A3)).addInPlace(vterm_pow4.mulInPlace(A4)).addInPlace(vterm_pow5.mulInPlace(A5)); 
         var vmask = vinp.compareGT(0f);
@@ -126,14 +127,14 @@ public class BlackScholes {
         return vresult;
     }
 
-    public static void computeSVM(SVMBuffer vsig, SVMBuffer vr, SVMBuffer vnegr, SVMBuffer vx, float[] call, float[] put, SVMBuffer vt, SVMBuffer vs0){
-        var vsig_sq_by2 = vsig.mul(vsig).mulInPlace(0.5f);
-        var vlog_s0byx = vs0.div(vx).logInPlace();
-        var vsig_sqrt_t = vt.sqrt().mulInPlace(vsig);
-        var vexp_neg_rt = vt.mul(vnegr).expInPlace();
-        var vd1 = vsig_sq_by2.addInPlace(vr).mulInPlace(vt).addInPlace(vlog_s0byx).divInPlace(vsig_sqrt_t);
+    public static void computeSVM(float sig, float r, SVMBuffer vK, float[] call, float[] put, SVMBuffer vt, SVMBuffer vs0){
+        var sig_sq_by2 = sig * sig * 0.5f;
+        var vlog_s0byx = vs0.div(vK).logInPlace();
+        var vsig_sqrt_t = vt.sqrt().mulInPlace(sig);
+        var vexp_neg_rt = vt.mul(-r).expInPlace();
+        var vd1 = vt.mulInPlace(sig_sq_by2 + r).addInPlace(vlog_s0byx).divInPlace(vsig_sqrt_t);
         var vd2 = vd1.sub(vsig_sqrt_t);
-        var vcall = vs0.mul(svmcdf(vd1)).subInPlace(vx.mulInPlace(vexp_neg_rt).mulInPlace(svmcdf(vd2)));
+        var vcall = vs0.mul(svmcdf(vd1)).subInPlace(vK.mulInPlace(vexp_neg_rt).mulInPlace(svmcdf(vd2)));
         var vput = vcall.add(vexp_neg_rt).subInPlace(vs0);
         vcall.intoArray(call);
         vput.intoArray(put);

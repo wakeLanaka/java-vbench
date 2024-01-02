@@ -14,7 +14,7 @@ public class MatrixMulBenchmark {
 
     @State(Scope.Thread)
     public static class BenchmarkSetup {
-        @Param({"64" ,"1024", "4096", "16384", "32768", "65536"})
+        @Param({"512", "1024", "2048", "4096"})
         int size;
 
         private float[] left;
@@ -57,9 +57,19 @@ public class MatrixMulBenchmark {
         bh.consume(MatrixMul.computeSVM(state.leftBuf, state.rightBuf, state.resultBuf, state.size));
     }
 
+    @Benchmark
+    public void MatrixMulSVMMatrix(Blackhole bh, BenchmarkSetup state){
+        bh.consume(MatrixMul.computeSVMMatrix(state.leftBuf, state.right, state.size));
+    }
+
+    // @Benchmark
+    // public void MatrixMulSVMAVX(Blackhole bh, BenchmarkSetup state){
+    //     bh.consume(MatrixMul.computeSVMAVX(state.left, state.right, state.size));
+    // }
+
     // @Benchmark
     // public void MatrixMulSVMNormal(Blackhole bh, BenchmarkSetup state){
-    //     bh.consume(MatrixMul.computeSVMNormal(state.left, state.right, state.size, SPECIES_SVM));
+    //     bh.consume(MatrixMul.computeSVMNormal(state.left, state.right, state.size));
     // }
 
     // @Benchmark
@@ -69,11 +79,10 @@ public class MatrixMulBenchmark {
     //     var vresult = SVMBuffer.fromArray(SPECIES_SVM, state.result);
     //     bh.consume(MatrixMul.computeSVM(vleft, vright, vresult, state.size));
     //     vresult.intoArray(state.result);
+    //     vleft.releaseSVMBuffer();
+    //     vright.releaseSVMBuffer();
+    //     vresult.releaseSVMBuffer();
     // }
 
 
-    // @Benchmark
-    // public void MatrixMulSVMRange(Blackhole bh, BenchmarkSetup state){
-    //     bh.consume(MatrixMul.computeSVMRange(state.leftBuf, state.rightBuf, state.size));
-    // }
 }
