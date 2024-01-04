@@ -57,10 +57,6 @@ public class DFT {
         }
     }
 
-    public static void computeOpenCL(SVMBuffer inReal, SVMBuffer outReal, SVMBuffer inImag, SVMBuffer outImag){
-        SVMBuffer.DFT(SPECIES_SVM, inReal, outReal, inImag, outImag);
-    }
-
     public static void computeKernelBuilder(float[] inReal, float[] outReal, float[] inImag, float[] outImag){
         int n = inReal.length;
 
@@ -87,10 +83,10 @@ public class DFT {
             var angle = iotaT.mul(twoPI).mulInPlace(k).divInPlace(n);
             var real1 = angle.cos().mulInPlace(inReal);
             var imag1 = angle.sin().mulInPlace(inImag);
-            outReal[k] = real1.addInPlace(imag1).sumReduce();
+            outReal[k] = real1.addInPlace(imag1).sumReduceFloat();
             var real2 = angle.sin().mulInPlace(inReal).mulInPlace(-1);
             var imag2 = angle.cos().mulInPlace(inImag);
-            outImag[k] = real2.addInPlace(imag2).sumReduce();
+            outImag[k] = real2.addInPlace(imag2).sumReduceFloat();
             angle.releaseSVMBuffer();
             real1.releaseSVMBuffer();
             imag1.releaseSVMBuffer();

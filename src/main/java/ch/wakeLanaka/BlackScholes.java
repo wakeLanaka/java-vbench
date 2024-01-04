@@ -140,10 +140,6 @@ public class BlackScholes {
         vput.intoArray(put);
     }
 
-    public static void computeOpenCL(float sig, float r, SVMBuffer x, SVMBuffer call, SVMBuffer put, SVMBuffer t, SVMBuffer s0){
-        SVMBuffer.BlackScholes(SPECIES_SVM, sig, r, x, call, put, t, s0);
-    }
-
     public static KernelStatement buildercdf(KernelBuilder builder, KernelStatement vinp){
         var vx1 = vinp.Abs();
         var vone = builder.Var(1.0f);

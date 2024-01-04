@@ -69,17 +69,17 @@ public class DFTBenchmark {
         DFT.computeSVM(state.inRealBuf, state.outReal, state.outRealBuf, state.outImag, state.iotaT);
     }
 
-    // @Benchmark
-    // @BenchmarkMode(Mode.AverageTime)
-    // public void DFTAVX(BenchmarkSetup state){
-    //     DFT.computeAVX(state.inReal, state.outReal, state.inImag, state.outImag, state.t);
-    // }
+    @Benchmark
+    @BenchmarkMode(Mode.AverageTime)
+    public void DFTAVX(BenchmarkSetup state){
+        DFT.computeAVX(state.inReal, state.outReal, state.inImag, state.outImag, state.t);
+    }
 
-    // @Benchmark
-    // @BenchmarkMode(Mode.AverageTime)
-    // public void DFTSerial(BenchmarkSetup state){
-    //     DFT.computeSerial(state.inReal, state.outReal, state.inImag, state.outImag);
-    // }
+    @Benchmark
+    @BenchmarkMode(Mode.AverageTime)
+    public void DFTSerial(BenchmarkSetup state){
+        DFT.computeSerial(state.inReal, state.outReal, state.inImag, state.outImag);
+    }
 
     @Benchmark
     @BenchmarkMode(Mode.AverageTime)
@@ -92,31 +92,6 @@ public class DFTBenchmark {
         inImagBuf.releaseSVMBuffer();
         iotaT.releaseSVMBuffer();
     }
-
-    // @Benchmark
-    // @BenchmarkMode(Mode.AverageTime)
-    // public void DFTOpenCL(BenchmarkSetup state){
-    //     DFT.computeOpenCL(state.inRealBuf, state.outRealBuf, state.inImagBuf, state.outImagBuf);
-    // }
-
-    // @Benchmark
-    // @BenchmarkMode(Mode.AverageTime)
-    // public void DFTOpenCLWithCopy(BenchmarkSetup state){
-    //     var inRealBuf = SVMBuffer.fromArray(SPECIES_SVM, state.inReal);
-    //     var outRealBuf = SVMBuffer.fromArray(SPECIES_SVM, state.outReal);
-    //     var inImagBuf = SVMBuffer.fromArray(SPECIES_SVM, state.inImag);
-    //     var outImagBuf = SVMBuffer.fromArray(SPECIES_SVM, state.outImag);
-
-    //     DFT.computeOpenCL(inRealBuf, outRealBuf, inImagBuf, outImagBuf);
-
-    //     outRealBuf.intoArray(state.outReal);
-    //     outImagBuf.intoArray(state.outImag);
-
-    //     inRealBuf.releaseSVMBuffer();
-    //     outRealBuf.releaseSVMBuffer();
-    //     inImagBuf.releaseSVMBuffer();
-    //     outImagBuf.releaseSVMBuffer();
-    // }
 
     // @Benchmark
     // @BenchmarkMode(Mode.AverageTime)

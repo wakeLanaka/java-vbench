@@ -67,7 +67,7 @@ public class MatrixMul {
         for(int i = 0; i < n; i++){
             for(int k = 0; k < n; k++){
                 var res = cacheA[i].mul(cacheB[k]);
-                c[i * n + k] = res.sumReduce();
+                c[i * n + k] = res.sumReduceFloat();
                 res.releaseSVMBuffer();
             }
             cacheA[i].releaseSVMBuffer();

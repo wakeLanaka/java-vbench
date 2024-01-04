@@ -126,14 +126,14 @@ public class GaussianBlur {
         float sum = 0.0f;
         var vy = SVMBuffer.fromArray(SPECIES_SVM, ys);
         var vx = SVMBuffer.fromArray(SPECIES_SVM, ys);
-        var vys = vy.mul(vy).repeat2(vy.length);
-        var vxs = vx.repeat1(vx.length).MultiplyInPlaceRepeat(vx);
+        var vys = vy.mul(vy).repeatEachNumber(vy.length);
+        var vxs = vx.repeatFullBuffer(vx.length).MultiplyRepeatInPlace(vx);
         var vKernelValues = vys.add(vxs).mulInPlace(-1);
 
         vKernelValues.divInPlace(exponentDenominator).expInPlace();
         vKernelValues.divInPlace(kernelDivision);
 
-        sum += vKernelValues.sumReduce();
+        sum += vKernelValues.sumReduceFloat();
 
         vKernelValues.divInPlace(sum);
 
@@ -158,9 +158,9 @@ public class GaussianBlur {
         var newGreensFloat = vgreensFloat.eachAreaFMA(vKernelValues, width, kernelWidth, resultelements);
         var newRedsFloat = vredsFloat.eachAreaFMA(vKernelValues, width, kernelWidth, resultelements);
 
-        var clampedVB = newBluesFloat.max(0).min(255);
-        var clampedVG = newGreensFloat.max(0).min(255);
-        var clampedVR = newRedsFloat.max(0).min(255);
+        var clampedVB = newBluesFloat.max(0.0f).min(255.0f);
+        var clampedVG = newGreensFloat.max(0.0f).min(255.0f);
+        var clampedVR = newRedsFloat.max(0.0f).min(255.0f);
 
         var vbInt = clampedVB.toInt();
         var vgInt = clampedVG.toInt();
@@ -188,16 +188,16 @@ public class GaussianBlur {
         vgreensFloat.releaseSVMBuffer();
         vredsFloat.releaseSVMBuffer();
         vKernelValues.releaseSVMBuffer();
-        colors.releaseSVMBufferInt();
-        shiftedRed.releaseSVMBufferInt();
-        shiftedGreen.releaseSVMBufferInt();
-        vbInt.releaseSVMBufferInt();
-        vgInt.releaseSVMBufferInt();
-        vrInt.releaseSVMBufferInt();
-        vbluesInt.releaseSVMBufferInt();
-        vgreensInt.releaseSVMBufferInt();
-        vredsInt.releaseSVMBufferInt();
-        vImagePixelsInt.releaseSVMBufferInt();
+        colors.releaseSVMBuffer();
+        shiftedRed.releaseSVMBuffer();
+        shiftedGreen.releaseSVMBuffer();
+        vbInt.releaseSVMBuffer();
+        vgInt.releaseSVMBuffer();
+        vrInt.releaseSVMBuffer();
+        vbluesInt.releaseSVMBuffer();
+        vgreensInt.releaseSVMBuffer();
+        vredsInt.releaseSVMBuffer();
+        vImagePixelsInt.releaseSVMBuffer();
 
         return outputPixels;
     }
