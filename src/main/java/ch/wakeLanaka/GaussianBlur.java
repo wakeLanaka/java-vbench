@@ -7,6 +7,7 @@ import jdk.incubator.vector.IntVector;
 import jdk.incubator.vector.VectorSpecies;
 import jdk.incubator.vector.GPUInformation;
 import jdk.incubator.vector.SVMBuffer;
+import jdk.incubator.vector.SVMBuffer.Type;
 
 public class GaussianBlur {
 
@@ -16,7 +17,6 @@ public class GaussianBlur {
     public static int[] blurAVX(int radius, float[] ys, BufferedImage image) {
         int width = image.getWidth();
         int height = image.getHeight();
-        BufferedImage outputImage = new BufferedImage(width, height, image.getType());
 
         float sigma = (float)Math.max(radius / 2.0, 1.0);
         int kernelWidth = 2 * radius + 1;
@@ -171,8 +171,6 @@ public class GaussianBlur {
         var colors = shiftedRed.or(shiftedGreen).orInPlace(vbInt);
         int[] outputPixels = new int[colors.length];
         colors.intoArray(outputPixels);
-        BufferedImage outputImage = new BufferedImage(width, height, image.getType());
-        outputImage.setRGB(radius, radius, resultWidth, resultHeight, outputPixels, 0, resultWidth);
 
         vy.releaseSVMBuffer();
         vx.releaseSVMBuffer();
@@ -201,11 +199,81 @@ public class GaussianBlur {
 
         return outputPixels;
     }
+public static int[] blurSVM(int radius, float[] ys, BufferedImage image){
+        int width = image.getWidth();
+        int height = image.getHeight();
+
+        float sigma = (float)Math.max(radius / 2.0, 1.0);
+        int kernelWidth = 2 * radius + 1;
+
+        float exponentDenominator = 2 * sigma * sigma;
+        float kernelDivision = exponentDenominator * (float)Math.PI;
+
+        float sum = 0.0f;
+        var vy = SVMBuffer.fromArray(SPECIES_SVM, ys);
+        var vx = SVMBuffer.fromArray(SPECIES_SVM, ys);
+        var vys = vy.mul(vy).repeatEachNumber(vy.length);
+        var vxs = vx.repeatFullBuffer(vx.length).MultiplyRepeatInPlace(vx);
+        var vKernelValues = vys.add(vxs).mulInPlace(-1);
+
+        vKernelValues.divInPlace(exponentDenominator).expInPlace();
+        vKernelValues.divInPlace(kernelDivision);
+
+        sum += vKernelValues.sumReduceFloat();
+
+        vKernelValues.divInPlace(sum);
+
+        var vImagePixels = SVMBuffer.zero(SPECIES_SVM, vKernelValues.length, Type.INT);
+        int resultWidth = width - 2 * radius;
+        int resultHeight = height - 2 * radius;
+        int resultElements = resultWidth * resultHeight;
+        int[] output = new int[resultElements];
+        var counter = 0;
+        for (int y = radius; y < height - radius; y++) {
+            for (int x = radius; x < width - radius; x++) {
+                int[] imagePixels = new int[vKernelValues.length];
+                image.getRGB(x - radius, y - radius, kernelWidth, kernelWidth, imagePixels, 0, kernelWidth);
+
+                vImagePixels.fill(imagePixels);
+
+                var vBlues = vImagePixels.and(0xFF);
+                var vGreens = vImagePixels.ashrInPlace(8).and(0xFF);
+                var vReds = vImagePixels.ashrInPlace(8).and(0xFF);
+
+                var vMulReds = vReds.mul(vKernelValues);
+                var vMulGreens = vGreens.mul(vKernelValues);
+                var vMulBlues = vBlues.mul(vKernelValues);
+
+                var redValue = vMulReds.sumReduceFloat();
+                var greenValue = vMulGreens.sumReduceFloat();
+                var blueValue = vMulBlues.sumReduceFloat();
+
+                int newRGB = (clamp((int) redValue) << 16) | (clamp((int) greenValue) << 8) | clamp((int) blueValue);
+                output[counter] = newRGB;
+                counter++;
+
+                vBlues.releaseSVMBuffer();
+                vGreens.releaseSVMBuffer();
+                vReds.releaseSVMBuffer();
+                vMulBlues.releaseSVMBuffer();
+                vMulGreens.releaseSVMBuffer();
+                vMulReds.releaseSVMBuffer();
+            }
+        }
+
+        vy.releaseSVMBuffer();
+        vx.releaseSVMBuffer();
+        vys.releaseSVMBuffer();
+        vxs.releaseSVMBuffer();
+        vKernelValues.releaseSVMBuffer();
+        vImagePixels.releaseSVMBuffer();
+
+        return output;
+    }
 
     public static int[] blurSerial(int radius, BufferedImage image) {
         int width = image.getWidth();
         int height = image.getHeight();
-        BufferedImage outputImage = new BufferedImage(width, height, image.getType());
 
         float sigma = (float)Math.max(radius / 2.0, 1.0);
         int kernelWidth = 2 * radius + 1;

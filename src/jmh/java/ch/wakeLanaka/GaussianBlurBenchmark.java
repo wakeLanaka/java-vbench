@@ -22,7 +22,7 @@ public class GaussianBlurBenchmark {
         @Setup(Level.Trial)
         public void doSetup() throws Exception {
             var absolutePath = new File(".").getAbsolutePath();
-            var path = Paths.get(absolutePath + "/src/jmh/java/ch/wakeLanaka/img/benchmark.png");
+            var path = Paths.get(absolutePath + "/src/test/java/ch/wakeLanaka/img/GaussianTest.png");
             File file = path.toFile().getAbsoluteFile();
 
             if (file.exists()){
@@ -62,6 +62,12 @@ public class GaussianBlurBenchmark {
     public void gaussianBlurSVMFast(BenchmarkSetup state) throws Exception {
         state.outputPixels = GaussianBlur.blurSVMFast(state.radius, state.ys, state.input);
     }
+
+    // @Benchmark
+    // @BenchmarkMode(Mode.AverageTime)
+    // public void gaussianBlurSVM(BenchmarkSetup state) throws Exception {
+    //     state.outputPixels = GaussianBlur.blurSVM(state.radius, state.ys, state.input);
+    // }
 
     @Benchmark
     @BenchmarkMode(Mode.AverageTime)

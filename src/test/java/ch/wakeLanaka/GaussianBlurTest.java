@@ -66,7 +66,7 @@ public class GaussianBlurTest {
     }
 
     @Test
-    void GaussianBlurvsGaussianBlurSVM7() throws Exception {
+    void GaussianBlurvsGaussianBlurSVMFast7() throws Exception {
         final int radius = 7;
 
         var input = createImage();
@@ -82,7 +82,7 @@ public class GaussianBlurTest {
     }
 
     @Test
-    void GaussianBlurvsGaussianBlurSVM16() throws Exception {
+    void GaussianBlurvsGaussianBlurSVMFast10() throws Exception {
         final int radius = 10;
 
         var input = createImage();
@@ -90,10 +90,10 @@ public class GaussianBlurTest {
         float[] ys = GeneratorHelpers.createRadiusValues(radius);
 
         var outputSerial = GaussianBlur.blurSerial(radius, input);
-        var outputAVX = GaussianBlur.blurSVMFast(radius, ys, input);
+        var outputSVM = GaussianBlur.blurSVMFast(radius, ys, input);
 
         for (var i = 0; i < outputSerial.length; i++) {
-            assertEquals(outputSerial[i], outputAVX[i]);
+            assertEquals(outputSerial[i], outputSVM[i]);
         }
     }
 }
