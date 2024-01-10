@@ -353,4 +353,148 @@ public class BlackScholesTest {
             assertEquals(put[i], putSVM[i], 0.001f);
         }
     }
+
+    @Test
+    void BlackScholesvsBlackScholesBuilder15() {
+        final int SIZE = 15;
+
+        float[] call = new float[SIZE];
+        float[] put = new float[SIZE];
+        float[] callBuilder = new float[SIZE];
+        float[] putBuilder = new float[SIZE];
+
+        float r = 0.02f;
+        float sig = 0.30f;
+        float[] s0 = fillRandom(5.0f, 30.0f, SIZE);
+        float[] x = fillRandom(1.0f, 100.0f, SIZE);
+        float[] t = fillRandom(0.25f, 10.0f, SIZE);
+
+        BlackScholes.computeSerial(sig, r, x, call, put, t, s0, SIZE, 0);
+        BlackScholes.computeKernelBuilder(sig, r, x, callBuilder, putBuilder, t, s0);
+
+        for (var i = 0; i < SIZE; i++) {
+            assertEquals(call[i], callBuilder[i], 0.001f);
+            assertEquals(put[i], putBuilder[i], 0.001f);
+        }
+    }
+
+    @Test
+    void BlackScholesvsBlackScholesBuilder16() {
+        final int SIZE = 16;
+
+        float[] call = new float[SIZE];
+        float[] put = new float[SIZE];
+        float[] callBuilder = new float[SIZE];
+        float[] putBuilder = new float[SIZE];
+
+        float r = 0.02f;
+        float sig = 0.30f;
+        float[] s0 = fillRandom(5.0f, 30.0f, SIZE);
+        float[] x = fillRandom(1.0f, 100.0f, SIZE);
+        float[] t = fillRandom(0.25f, 10.0f, SIZE);
+
+        BlackScholes.computeSerial(sig, r, x, call, put, t, s0, SIZE, 0);
+        BlackScholes.computeKernelBuilder(sig, r, x, callBuilder, putBuilder, t, s0);
+
+        for (var i = 0; i < SIZE; i++) {
+            assertEquals(call[i], callBuilder[i], 0.001f);
+            assertEquals(put[i], putBuilder[i], 0.001f);
+        }
+    }
+
+    @Test
+    void BlackScholesvsBlackScholesBuilder17() {
+        final int SIZE = 17;
+
+        float[] call = new float[SIZE];
+        float[] put = new float[SIZE];
+        float[] callBuilder = new float[SIZE];
+        float[] putBuilder = new float[SIZE];
+
+        float r = 0.02f;
+        float sig = 0.30f;
+        float[] s0 = fillRandom(5.0f, 30.0f, SIZE);
+        float[] x = fillRandom(1.0f, 100.0f, SIZE);
+        float[] t = fillRandom(0.25f, 10.0f, SIZE);
+
+        BlackScholes.computeSerial(sig, r, x, call, put, t, s0, SIZE, 0);
+        BlackScholes.computeKernelBuilder(sig, r, x, callBuilder, putBuilder, t, s0);
+
+        for (var i = 0; i < SIZE; i++) {
+            assertEquals(call[i], callBuilder[i], 0.001f);
+            assertEquals(put[i], putBuilder[i], 0.001f);
+        }
+    }
+
+    @Test
+    void BlackScholesvsBlackScholesBuilder511() {
+        final int SIZE = 511;
+
+        float[] call = new float[SIZE];
+        float[] put = new float[SIZE];
+        float[] callBuilder = new float[SIZE];
+        float[] putBuilder = new float[SIZE];
+
+        float r = 0.02f;
+        float sig = 0.30f;
+        float[] s0 = fillRandom(5.0f, 30.0f, SIZE);
+        float[] x = fillRandom(1.0f, 100.0f, SIZE);
+        float[] t = fillRandom(0.25f, 10.0f, SIZE);
+
+        BlackScholes.computeSerial(sig, r, x, call, put, t, s0, SIZE, 0);
+        BlackScholes.computeKernelBuilder(sig, r, x, callBuilder, putBuilder, t, s0);
+
+        for (var i = 0; i < SIZE; i++) {
+            assertEquals(call[i], callBuilder[i], 0.001f);
+            assertEquals(put[i], putBuilder[i], 0.001f);
+        }
+    }
+
+    @Test
+    void BlackScholesvsBlackScholesBuilder512() {
+        final int SIZE = 512;
+
+        float[] call = new float[SIZE];
+        float[] put = new float[SIZE];
+        float[] callBuilder = new float[SIZE];
+        float[] putBuilder = new float[SIZE];
+
+        float r = 0.02f;
+        float sig = 0.30f;
+        float[] s0 = fillRandom(5.0f, 30.0f, SIZE);
+        float[] x = fillRandom(1.0f, 100.0f, SIZE);
+        float[] t = fillRandom(0.25f, 10.0f, SIZE);
+
+        BlackScholes.computeSerial(sig, r, x, call, put, t, s0, SIZE, 0);
+        BlackScholes.computeKernelBuilder(sig, r, x, callBuilder, putBuilder, t, s0);
+
+        for (var i = 0; i < SIZE; i++) {
+            assertEquals(call[i], callBuilder[i], 0.001f);
+            assertEquals(put[i], putBuilder[i], 0.001f);
+        }
+    }
+
+    @Test
+    void BlackScholesvsBlackScholesBuilder513() {
+        final int SIZE = 513;
+
+        float[] call = new float[SIZE];
+        float[] put = new float[SIZE];
+        float[] callBuilder = new float[SIZE];
+        float[] putBuilder = new float[SIZE];
+
+        float r = 0.02f;
+        float sig = 0.30f;
+        float[] s0 = fillRandom(5.0f, 30.0f, SIZE);
+        float[] x = fillRandom(1.0f, 100.0f, SIZE);
+        float[] t = fillRandom(0.25f, 10.0f, SIZE);
+
+        BlackScholes.computeSerial(sig, r, x, call, put, t, s0, SIZE, 0);
+        BlackScholes.computeKernelBuilder(sig, r, x, callBuilder, putBuilder, t, s0);
+
+        for (var i = 0; i < SIZE; i++) {
+            assertEquals(call[i], callBuilder[i], 0.001f);
+            assertEquals(put[i], putBuilder[i], 0.001f);
+        }
+    }
 }

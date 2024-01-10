@@ -61,16 +61,4 @@ public class MatrixMulBenchmark {
     public void MatrixMulSVMMatrix(Blackhole bh, BenchmarkSetup state){
         bh.consume(MatrixMul.computeSVMMatrix(state.leftBuf, state.right, state.size));
     }
-
-    // @Benchmark
-    // public void MatrixMulSVMWithCopy(Blackhole bh, BenchmarkSetup state){
-    //     var vleft = SVMBuffer.fromArray(SPECIES_SVM, state.left);
-    //     var vright = SVMBuffer.fromArray(SPECIES_SVM, state.right);
-    //     var vresult = SVMBuffer.fromArray(SPECIES_SVM, state.result);
-    //     bh.consume(MatrixMul.computeSVM(vleft, vright, vresult, state.size));
-    //     vresult.intoArray(state.result);
-    //     vleft.releaseSVMBuffer();
-    //     vright.releaseSVMBuffer();
-    //     vresult.releaseSVMBuffer();
-    // }
 }

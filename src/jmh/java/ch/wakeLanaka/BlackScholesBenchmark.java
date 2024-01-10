@@ -123,24 +123,9 @@ public class BlackScholesBenchmark {
         s0Buf.releaseSVMBuffer();
     }
 
-//     // @Benchmark
-//     // @BenchmarkMode(Mode.AverageTime)
-//     // public void blackScholesKernelBuilderWithCopy(BenchmarkSetup state){
-//     //     var vx = SVMBuffer.fromArray(SPECIES_SVM, state.x);
-//     //     var vcall = SVMBuffer.fromArray(SPECIES_SVM, state.call);
-//     //     var vput = SVMBuffer.fromArray(SPECIES_SVM, state.put);
-//     //     var vt = SVMBuffer.fromArray(SPECIES_SVM, state.t);
-//     //     var vs0 = SVMBuffer.fromArray(SPECIES_SVM, state.s0);
-
-//     //     BlackScholes.computeKernelBuilder(state.sig, state.r, vx, vcall, vput, vt, vs0);
-
-//     //     vcall.intoArray(state.call);
-//     //     vput.intoArray(state.put);
-//     // }
-
-//     // @Benchmark
-//     // @BenchmarkMode(Mode.AverageTime)
-//     // public void blackScholesKernelBuilder(BenchmarkSetup state){
-//     //     BlackScholes.computeKernelBuilder(state.sig, state.r, state.xBuf, state.callBuf, state.putBuf, state.tBuf, state.s0Buf);
-//     // }
+    @Benchmark
+    @BenchmarkMode(Mode.AverageTime)
+    public void blackScholesKernelBuilderWithCopy(BenchmarkSetup state){
+        BlackScholes.computeKernelBuilder(state.sig, state.r, state.x, state.call, state.put, state.t, state.s0);
+    }
 }

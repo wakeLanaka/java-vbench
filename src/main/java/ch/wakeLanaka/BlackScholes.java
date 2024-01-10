@@ -9,6 +9,8 @@ import jdk.incubator.vector.VectorOperators;
 import jdk.incubator.vector.VectorSpecies;
 import jdk.incubator.vector.KernelBuilder;
 import jdk.incubator.vector.KernelBuilder.KernelStatement;
+import jdk.incubator.vector.ForKernelBuilder;
+
 
 public class BlackScholes {
     private static final GPUInformation SPECIES_SVM = SVMBuffer.SPECIES_PREFERRED;
@@ -58,6 +60,7 @@ public class BlackScholes {
             float exp_neg_rt = (float)Math.exp(-r * t[i]);
             float d1 = (log_s0byx + (r + sig_sq_by2) * t[i])/(sig_sqrt_t);
             float d2 = (log_s0byx + (r - sig_sq_by2) * t[i])/(sig_sqrt_t);
+            var res1 = cdf(d1);
             call[i] = s0[i] * cdf(d1) - exp_neg_rt * x[i] * cdf(d2);
             put[i]  = call[i] + exp_neg_rt - s0[i];
        }
@@ -157,20 +160,34 @@ public class BlackScholes {
         return vresult1.Blend(vresult2, vmask);
     }
 
-    public static void computeKernelBuilder(float sig, float r, SVMBuffer vx, SVMBuffer vcall, SVMBuffer vput, SVMBuffer vt, SVMBuffer vs0){
+    public static void computeKernelBuilder(float sig, float r, float[] x, float[] call, float[] put, float[] t, float[] s0){
 
-        var builder = new KernelBuilder(vx.length);
+        int n = x.length;
 
-        var vsig_sq_by2 = builder.Var(sig).Mul(sig).Mul(0.5f);
-        var vlog_s0byx = builder.Var(vs0).Div(vx).Log();
-        var vsig_sqrt_t = builder.Var(vt).Sqrt().Mul(sig);
-        var vexp_neg_rt = builder.Var(vt).Mul(-r).Exp();
-        var vd1 = vlog_s0byx.Add(r).Mul(vt).Add(vlog_s0byx).Div(vsig_sqrt_t);
-        var vd2 = vd1.Sub(vsig_sqrt_t);
-        var vcdf1 = buildercdf(builder, vd1);
-        var vcdf2 = buildercdf(builder, vd2);
-        builder.Assign(vcall, builder.Var(vs0).Mul(vcdf1).Sub(builder.Var(vx).Mul(vexp_neg_rt).Mul(vcdf2)));
-        builder.Assign(vput, builder.Var(vcall).Add(vexp_neg_rt).Sub(vs0));
-        builder.ExecKernel(SPECIES_SVM, builder);
+        var loop = ForKernelBuilder.For(0, n, n);
+            var vcall = SVMBuffer.fromArray(loop.getInfo(), call);
+            var vput = SVMBuffer.fromArray(loop.getInfo(), put);
+            var vx = SVMBuffer.fromArray(loop.getInfo(), x);
+            var vt = SVMBuffer.fromArray(loop.getInfo(), t);
+            var vs0 = SVMBuffer.fromArray(loop.getInfo(), s0);
+
+            var vsig_sq_by2 = loop.body.Var(sig).Mul(sig).Mul(0.5f);
+            var vlog_s0byx = loop.body.Var(vs0).Div(vx).Log();
+            var vsig_sqrt_t = loop.body.Var(vt).Sqrt().Mul(sig);
+            var vexp_neg_rt = loop.body.Var(vt).Mul(-r).Exp();
+            var vd1 = vsig_sq_by2.Add(r).Mul(vt).Add(vlog_s0byx).Div(vsig_sqrt_t);
+            var vd2 = vd1.Sub(vsig_sqrt_t);
+            var vcdf1 = buildercdf(loop.body, vd1);
+            var vcdf2 = buildercdf(loop.body, vd2);
+            loop.body.Assign(vcall, loop.body.Var(vs0).Mul(vcdf1).Sub(loop.body.Var(vx).Mul(vexp_neg_rt).Mul(vcdf2)));
+            loop.body.Assign(vput, loop.body.Var(vcall).Add(vexp_neg_rt).Sub(vs0));
+        loop.End();
+        vcall.intoArray(call);
+        vput.intoArray(put);
+        vcall.releaseSVMBuffer();
+        vput.releaseSVMBuffer();
+        vx.releaseSVMBuffer();
+        vt.releaseSVMBuffer();
+        vs0.releaseSVMBuffer();
     }
 }
