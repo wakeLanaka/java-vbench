@@ -60,18 +60,15 @@ public class DFT {
     public static void computeKernelBuilder(float[] inReal, float[] outReal, float[] inImag, float[] outImag){
         int n = inReal.length;
 
-        var loop = ForKernelBuilder.For(0, n, 1);
-        System.out.println("HMM");
+        var loop = ForKernelBuilder.For(n, 0, 1, 1);
             var vinReal = SVMBuffer.fromArray(loop.getInfo(), inReal);
             var voutReal = SVMBuffer.fromArray(loop.getInfo(), outReal);
             var vinImag = SVMBuffer.fromArray(loop.getInfo(), inImag);
             var voutImag = SVMBuffer.fromArray(loop.getInfo(), outImag);
 
             var angle = loop.body.Iota().Mul(2).Mul((float)Math.PI).Mul(loop.getIndex()).Div(n);
-            loop.body = loop.body.AddAssign(voutReal, angle.Cos().Mul(vinReal, loop.getIndex()).Add(angle.Sin().Mul(vinImag, loop.getIndex())));
-            loop.body = loop.body.AddAssign(voutImag, angle.Cos());
-            // loop.body = loop.body.AddAssign(voutReal, angle.Cos().Mul(vinReal, loop.getIndex()).Add(angle.Sin().Mul(vinImag, loop.getIndex())));
-            // loop.body = loop.body.AddAssign(voutImag, angle.Sin().Mul(vinReal, loop.getIndex()).Mul(-1).Add(angle.Cos().Mul(vinImag, loop.getIndex())));
+            loop.body.AddAssign(voutReal, angle.Cos().Mul(vinReal, loop.getIndex()).Add(angle.Sin().Mul(vinImag, loop.getIndex())));
+            loop.body.AddAssign(voutImag, angle.Sin().Mul(vinReal, loop.getIndex()).Mul(-1).Add(angle.Cos().Mul(vinImag, loop.getIndex())));
         loop.End();
 
         voutReal.intoArray(outReal);

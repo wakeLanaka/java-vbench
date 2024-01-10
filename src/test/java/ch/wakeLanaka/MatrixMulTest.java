@@ -251,4 +251,76 @@ public class MatrixMulTest {
             assertEquals(c_serial[i], c_svm[i], 0.01f);
         }
     }
+
+    @Test
+    void mulMatrixvsMatrixSVMKernelBuilder15() {
+        final int SIZE = 15;
+        var a = GeneratorHelpers.newFloatRowMajorMatrix(SIZE * SIZE);
+        var b = GeneratorHelpers.newFloatRowMajorMatrix(SIZE * SIZE);
+        var c_serial = MatrixMul.computeSerial(a, b, SIZE);
+        var c_builder = MatrixMul.computeSVMKernelBuilder(a, b, SIZE);
+        for (var i = 0; i < SIZE * SIZE; i++) {
+            assertEquals(c_serial[i], c_builder[i], 0.01f);
+        }
+    }
+
+    @Test
+    void mulMatrixvsMatrixSVMKernelBuilder16() {
+        final int SIZE = 16;
+        var a = GeneratorHelpers.newFloatRowMajorMatrix(SIZE * SIZE);
+        var b = GeneratorHelpers.newFloatRowMajorMatrix(SIZE * SIZE);
+        var c_serial = MatrixMul.computeSerial(a, b, SIZE);
+        var c_builder = MatrixMul.computeSVMKernelBuilder(a, b, SIZE);
+        for (var i = 0; i < SIZE * SIZE; i++) {
+            assertEquals(c_serial[i], c_builder[i], 0.01f);
+        }
+    }
+
+    @Test
+    void mulMatrixvsMatrixSVMKernelBuilder17() {
+        final int SIZE = 17;
+        var a = GeneratorHelpers.newFloatRowMajorMatrix(SIZE * SIZE);
+        var b = GeneratorHelpers.newFloatRowMajorMatrix(SIZE * SIZE);
+        var c_serial = MatrixMul.computeSerial(a, b, SIZE);
+        var c_builder = MatrixMul.computeSVMKernelBuilder(a, b, SIZE);
+        for (var i = 0; i < SIZE * SIZE; i++) {
+            assertEquals(c_serial[i], c_builder[i], 0.01f);
+        }
+    }
+
+    // @Test
+    // void mulMatrixvsMatrixSVMKernelBuilder511() {
+    //     final int SIZE = 511;
+    //     var a = GeneratorHelpers.newFloatRowMajorMatrix(SIZE * SIZE);
+    //     var b = GeneratorHelpers.newFloatRowMajorMatrix(SIZE * SIZE);
+    //     var c_serial = MatrixMul.computeSerial(a, b, SIZE);
+    //     var c_builder = MatrixMul.computeSVMKernelBuilder(a, b, SIZE);
+    //     for (var i = 0; i < SIZE * SIZE; i++) {
+    //         assertEquals(c_serial[i], c_builder[i], 1000f);
+    //     }
+    // }
+
+    // @Test
+    // void mulMatrixvsMatrixSVMKernelBuilder512() {
+    //     final int SIZE = 512;
+    //     var a = GeneratorHelpers.newFloatRowMajorMatrix(SIZE * SIZE);
+    //     var b = GeneratorHelpers.newFloatRowMajorMatrix(SIZE * SIZE);
+    //     var c_serial = MatrixMul.computeSerial(a, b, SIZE);
+    //     var c_builder = MatrixMul.computeSVMKernelBuilder(a, b, SIZE);
+    //     for (var i = 0; i < SIZE * SIZE; i++) {
+    //         assertEquals(c_serial[i], c_builder[i], 1000f);
+    //     }
+    // }
+
+    // @Test
+    // void mulMatrixvsMatrixSVMKernelBuilder513() {
+    //     final int SIZE = 513;
+    //     var a = GeneratorHelpers.newFloatRowMajorMatrix(SIZE * SIZE);
+    //     var b = GeneratorHelpers.newFloatRowMajorMatrix(SIZE * SIZE);
+    //     var c_serial = MatrixMul.computeSerial(a, b, SIZE);
+    //     var c_builder = MatrixMul.computeSVMKernelBuilder(a, b, SIZE);
+    //     for (var i = 0; i < SIZE * SIZE; i++) {
+    //         assertEquals(c_serial[i], c_builder[i], 1000f);
+    //     }
+    // }
 }

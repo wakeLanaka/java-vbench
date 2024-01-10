@@ -164,7 +164,7 @@ public class BlackScholes {
 
         int n = x.length;
 
-        var loop = ForKernelBuilder.For(0, n, n);
+        var loop = ForKernelBuilder.For(n, 0, n, n);
             var vcall = SVMBuffer.fromArray(loop.getInfo(), call);
             var vput = SVMBuffer.fromArray(loop.getInfo(), put);
             var vx = SVMBuffer.fromArray(loop.getInfo(), x);

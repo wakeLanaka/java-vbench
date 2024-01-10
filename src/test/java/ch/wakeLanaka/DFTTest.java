@@ -304,7 +304,6 @@ public class DFTTest {
 
         var inReal = GeneratorHelpers.newFloatRowMajorMatrix(SIZE);
         var inImag = GeneratorHelpers.newFloatRowMajorMatrix(SIZE);
-        var t = GeneratorHelpers.iotaFloatArray(SIZE);
 
         float[] outRealSerial = new float[SIZE];
         float[] outImagSerial = new float[SIZE];
@@ -326,7 +325,6 @@ public class DFTTest {
 
         var inReal = GeneratorHelpers.newFloatRowMajorMatrix(SIZE);
         var inImag = GeneratorHelpers.newFloatRowMajorMatrix(SIZE);
-        var t = GeneratorHelpers.iotaFloatArray(SIZE);
 
         float[] outRealSerial = new float[SIZE];
         float[] outImagSerial = new float[SIZE];
@@ -348,7 +346,6 @@ public class DFTTest {
 
         var inReal = GeneratorHelpers.newFloatRowMajorMatrix(SIZE);
         var inImag = GeneratorHelpers.newFloatRowMajorMatrix(SIZE);
-        var t = GeneratorHelpers.iotaFloatArray(SIZE);
 
         float[] outRealSerial = new float[SIZE];
         float[] outImagSerial = new float[SIZE];
@@ -370,7 +367,6 @@ public class DFTTest {
 
         var inReal = GeneratorHelpers.newFloatRowMajorMatrix(SIZE);
         var inImag = GeneratorHelpers.newFloatRowMajorMatrix(SIZE);
-        var t = GeneratorHelpers.iotaFloatArray(SIZE);
 
         float[] outRealSerial = new float[SIZE];
         float[] outImagSerial = new float[SIZE];
@@ -392,7 +388,6 @@ public class DFTTest {
 
         var inReal = GeneratorHelpers.newFloatRowMajorMatrix(SIZE);
         var inImag = GeneratorHelpers.newFloatRowMajorMatrix(SIZE);
-        var t = GeneratorHelpers.iotaFloatArray(SIZE);
 
         float[] outRealSerial = new float[SIZE];
         float[] outImagSerial = new float[SIZE];
@@ -414,7 +409,6 @@ public class DFTTest {
 
         var inReal = GeneratorHelpers.newFloatRowMajorMatrix(SIZE);
         var inImag = GeneratorHelpers.newFloatRowMajorMatrix(SIZE);
-        var t = GeneratorHelpers.iotaFloatArray(SIZE);
 
         float[] outRealSerial = new float[SIZE];
         float[] outImagSerial = new float[SIZE];

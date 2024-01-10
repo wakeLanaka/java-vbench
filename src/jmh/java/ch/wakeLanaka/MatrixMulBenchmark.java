@@ -61,4 +61,9 @@ public class MatrixMulBenchmark {
     public void MatrixMulSVMMatrix(Blackhole bh, BenchmarkSetup state){
         bh.consume(MatrixMul.computeSVMMatrix(state.leftBuf, state.right, state.size));
     }
+
+    @Benchmark
+    public void MatrixMulSVMBuilder(Blackhole bh, BenchmarkSetup state){
+        bh.consume(MatrixMul.computeSVMKernelBuilder(state.left, state.right, state.size));
+    }
 }

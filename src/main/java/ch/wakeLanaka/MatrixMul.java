@@ -4,6 +4,7 @@ import jdk.incubator.vector.FloatVector;
 import jdk.incubator.vector.VectorSpecies;
 import jdk.incubator.vector.GPUInformation;
 import jdk.incubator.vector.SVMBuffer;
+import jdk.incubator.vector.ForKernelBuilder;
 
 public class MatrixMul {
     private static final VectorSpecies<Float> SPECIES = FloatVector.SPECIES_PREFERRED;
@@ -84,6 +85,23 @@ public class MatrixMul {
             vb.releaseSVMBuffer();
             vc.releaseSVMBuffer();
         }
+        return c;
+    }
+
+    public static float[] computeSVMKernelBuilder(float[] a, float[] b, int n){
+        float[] c = new float[n * n];
+
+        var loop = ForKernelBuilder.For(n * n, 0, n, 1);
+            var va = SVMBuffer.fromArray(loop.getInfo(), a);
+            var vb = SVMBuffer.fromArray(loop.getInfo(), b);
+            var vc = SVMBuffer.fromArray(loop.getInfo(), c);
+            var x = loop.body.Var(va, "(i / " + n + ") * " + n + " + " + loop.getIndex().getIndex()).Mul(vb, "i % " + n + " + " + n + " * " + loop.getIndex().getIndex());
+            loop.body.AddAssign(vc, x);
+        loop.End();
+        vc.intoArray(c);
+        va.releaseSVMBuffer();
+        vb.releaseSVMBuffer();
+        vc.releaseSVMBuffer();
         return c;
     }
 }
