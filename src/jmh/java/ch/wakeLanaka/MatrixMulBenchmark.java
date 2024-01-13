@@ -28,17 +28,13 @@ public class MatrixMulBenchmark {
         public void doSetup() {
             left = newFloatRowMajorMatrix(size * size);
             right = newFloatRowMajorMatrix(size * size);
-            leftBuf = SVMBuffer.fromArray(SPECIES_SVM, this.left);
-            rightBuf = SVMBuffer.fromArray(SPECIES_SVM, this.right);
             result = new float[size * size];
-            resultBuf = SVMBuffer.fromArray(SPECIES_SVM, result);
+            leftBuf = SVMBuffer.fromArray(SPECIES_SVM, this.left);
         }
 
         @TearDown(Level.Trial)
         public void doTearDown(){
             leftBuf.releaseSVMBuffer();
-            rightBuf.releaseSVMBuffer();
-            resultBuf.releaseSVMBuffer();
         }
     }
 
@@ -54,7 +50,13 @@ public class MatrixMulBenchmark {
 
     @Benchmark
     public void MatrixMulSVM(Blackhole bh, BenchmarkSetup state){
-        bh.consume(MatrixMul.computeSVM(state.leftBuf, state.rightBuf, state.resultBuf, state.size));
+        var leftBuf = SVMBuffer.fromArray(SPECIES_SVM, state.left);
+        var rightBuf = SVMBuffer.fromArray(SPECIES_SVM, state.right);
+        var resultBuf = SVMBuffer.fromArray(SPECIES_SVM, state.result);
+        bh.consume(MatrixMul.computeSVM(leftBuf, rightBuf, resultBuf, state.size));
+        leftBuf.releaseSVMBuffer();
+        rightBuf.releaseSVMBuffer();
+        resultBuf.releaseSVMBuffer();
     }
 
     @Benchmark
