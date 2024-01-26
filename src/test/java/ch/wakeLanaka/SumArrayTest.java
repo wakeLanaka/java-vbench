@@ -1,53 +1,289 @@
-// package ch.styp;
+package ch.wakeLanaka;
 
-// import jdk.incubator.vector.IntVector;
-// import jdk.incubator.vector.VectorSpecies;
-// import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Test;
 
-// import static org.junit.jupiter.api.Assertions.assertEquals;
-// import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import jdk.incubator.vector.GPUInformation;
+import jdk.incubator.vector.SVMBuffer;
 
-// public class SumArrayTest {
+public class SumArrayTest {
 
-//     @Test
-//     void sumArrayVectorVsScalar(){
-//         // Prime Number, that doesn't make the registers align by accident!
-//         final int PRIME_NUMBER = 919;
+    private static final GPUInformation SPECIES_SVM = SVMBuffer.SPECIES_PREFERRED;
 
-//         var a = GeneratorHelpers.initIntArray(PRIME_NUMBER);
-//         var b = GeneratorHelpers.initIntArray(PRIME_NUMBER);
+    @Test
+    void SUMvsSUMAVX15() {
+        final int SIZE = 15;
 
-//         var c_scalar = SumArray.scalarComputation(a, b);
-//         var c_vector = SumArray.vectorComputation(a, b);
+        var a = GeneratorHelpers.initFloatArray(SIZE);
 
-//         assertTrue(c_scalar.length == PRIME_NUMBER);
-//         assertTrue(c_scalar.length == c_vector.length);
+        var result = SumArray.scalarComputation(a, a);
+        var avx = SumArray.vectorComputation(a, a);
 
-//         for(var i=0; i<PRIME_NUMBER; i++){
-//             assertEquals(c_scalar[i], c_vector[i]);
-//         }
+        for (var i = 0; i < SIZE; i++) {
+            assertEquals(result[i], avx[i], 0.001f);
+        }
+    }
 
-//     }
+    @Test
+    void SUMvsSUMAVX16() {
+        final int SIZE = 16;
 
-//     @Test
-//     void capabilityTest(){
-//         VectorSpecies<Integer> SPECIES = IntVector.SPECIES_PREFERRED;
-//         System.out.print(SPECIES);
-//     }
+        var a = GeneratorHelpers.initFloatArray(SIZE);
 
-//     @Test
-//     void fmaArrayVectorVsScalar(){
-//         // Prime Number, that doesn't make the registers align by accident!
-//         final int PRIME_NUMBER = 919;
+        var result = SumArray.scalarComputation(a, a);
+        var avx = SumArray.vectorComputation(a, a);
 
-//         var a = GeneratorHelpers.initFloatArray(PRIME_NUMBER);
-//         var b = GeneratorHelpers.initFloatArray(PRIME_NUMBER);
+        for (var i = 0; i < SIZE; i++) {
+            assertEquals(result[i], avx[i], 0.001f);
+        }
+    }
 
-//         var c_scalar = FmaArray.scalarFMA(a, b);
-//         var c_vector = FmaArray.vectorFMA(a, b);
+    @Test
+    void SUMvsSUMAVX17() {
+        final int SIZE = 17;
 
-//         assertEquals(c_scalar, c_vector, 0.0001f);
+        var a = GeneratorHelpers.initFloatArray(SIZE);
 
-//     }
+        var result = SumArray.scalarComputation(a, a);
+        var avx = SumArray.vectorComputation(a, a);
 
-// }
+        for (var i = 0; i < SIZE; i++) {
+            assertEquals(result[i], avx[i], 0.001f);
+        }
+    }
+
+    @Test
+    void SUMvsSUMAVX511() {
+        final int SIZE = 511;
+
+        var a = GeneratorHelpers.initFloatArray(SIZE);
+
+        var result = SumArray.scalarComputation(a, a);
+        var avx = SumArray.vectorComputation(a, a);
+
+        for (var i = 0; i < SIZE; i++) {
+            assertEquals(result[i], avx[i], 0.001f);
+        }
+    }
+
+    @Test
+    void SUMvsSUMAVX512() {
+        final int SIZE = 512;
+
+        var a = GeneratorHelpers.initFloatArray(SIZE);
+
+        var result = SumArray.scalarComputation(a, a);
+        var avx = SumArray.vectorComputation(a, a);
+
+        for (var i = 0; i < SIZE; i++) {
+            assertEquals(result[i], avx[i], 0.001f);
+        }
+    }
+
+    @Test
+    void SUMvsSUMAVX513() {
+        final int SIZE = 513;
+
+        var a = GeneratorHelpers.initFloatArray(SIZE);
+
+        var result = SumArray.scalarComputation(a, a);
+        var avx = SumArray.vectorComputation(a, a);
+
+        for (var i = 0; i < SIZE; i++) {
+            assertEquals(result[i], avx[i], 0.001f);
+        }
+    }
+
+    @Test
+    void SUMvsSUMGPUCopy15() {
+        final int SIZE = 15;
+
+        var a = GeneratorHelpers.initFloatArray(SIZE);
+
+        var result = SumArray.scalarComputation(a, a);
+        var svm = SumArray.gpuSVMCopyAddition(a, a);
+
+        for (var i = 0; i < SIZE; i++) {
+            assertEquals(result[i], svm[i], 0.001f);
+        }
+    }
+
+    @Test
+    void SUMvsSUMGPUCopy16() {
+        final int SIZE = 16;
+
+        var a = GeneratorHelpers.initFloatArray(SIZE);
+
+        var result = SumArray.scalarComputation(a, a);
+        var svm = SumArray.gpuSVMCopyAddition(a, a);
+
+        for (var i = 0; i < SIZE; i++) {
+            assertEquals(result[i], svm[i], 0.001f);
+        }
+    }
+
+    @Test
+    void SUMvsSUMGPUCopy17() {
+        final int SIZE = 17;
+
+        var a = GeneratorHelpers.initFloatArray(SIZE);
+
+        var result = SumArray.scalarComputation(a, a);
+        var svm = SumArray.gpuSVMCopyAddition(a, a);
+
+        for (var i = 0; i < SIZE; i++) {
+            assertEquals(result[i], svm[i], 0.001f);
+        }
+    }
+
+    @Test
+    void SUMvsSUMGPUCopy511() {
+        final int SIZE = 511;
+
+        var a = GeneratorHelpers.initFloatArray(SIZE);
+
+        var result = SumArray.scalarComputation(a, a);
+        var svm = SumArray.gpuSVMCopyAddition(a, a);
+
+        for (var i = 0; i < SIZE; i++) {
+            assertEquals(result[i], svm[i], 0.001f);
+        }
+    }
+
+    @Test
+    void SUMvsSUMGPUCopy512() {
+        final int SIZE = 512;
+
+        var a = GeneratorHelpers.initFloatArray(SIZE);
+
+        var result = SumArray.scalarComputation(a, a);
+        var svm = SumArray.gpuSVMCopyAddition(a, a);
+
+        for (var i = 0; i < SIZE; i++) {
+            assertEquals(result[i], svm[i], 0.001f);
+        }
+    }
+
+    @Test
+    void SUMvsSUMGPUCopy513() {
+        final int SIZE = 513;
+
+        var a = GeneratorHelpers.initFloatArray(SIZE);
+
+        var result = SumArray.scalarComputation(a, a);
+        var svm = SumArray.gpuSVMCopyAddition(a, a);
+
+        for (var i = 0; i < SIZE; i++) {
+            assertEquals(result[i], svm[i], 0.001f);
+        }
+    }
+
+
+    @Test
+    void SUMvsSUMGPU15() {
+        final int SIZE = 15;
+
+        var a = GeneratorHelpers.initFloatArray(SIZE);
+        var bufferA = SVMBuffer.fromArray(SPECIES_SVM, a);
+        var bufferB = SVMBuffer.fromArray(SPECIES_SVM, a);
+        var c = new float[a.length];
+
+        var result = SumArray.scalarComputation(a, a);
+        var svm = SumArray.gpuSVMAddition(bufferA, bufferB);
+        svm.intoArray(c);
+
+        for (var i = 0; i < SIZE; i++) {
+            assertEquals(result[i], c[i], 0.001f);
+        }
+    }
+
+    @Test
+    void SUMvsSUMGPU16() {
+        final int SIZE = 16;
+
+        var a = GeneratorHelpers.initFloatArray(SIZE);
+        var bufferA = SVMBuffer.fromArray(SPECIES_SVM, a);
+        var bufferB = SVMBuffer.fromArray(SPECIES_SVM, a);
+        var c = new float[a.length];
+
+        var result = SumArray.scalarComputation(a, a);
+        var svm = SumArray.gpuSVMAddition(bufferA, bufferB);
+        svm.intoArray(c);
+
+        for (var i = 0; i < SIZE; i++) {
+            assertEquals(result[i], c[i], 0.001f);
+        }
+    }
+
+    @Test
+    void SUMvsSUMGPU17() {
+        final int SIZE = 17;
+
+        var a = GeneratorHelpers.initFloatArray(SIZE);
+        var bufferA = SVMBuffer.fromArray(SPECIES_SVM, a);
+        var bufferB = SVMBuffer.fromArray(SPECIES_SVM, a);
+        var c = new float[a.length];
+
+        var result = SumArray.scalarComputation(a, a);
+        var svm = SumArray.gpuSVMAddition(bufferA, bufferB);
+        svm.intoArray(c);
+
+        for (var i = 0; i < SIZE; i++) {
+            assertEquals(result[i], c[i], 0.001f);
+        }
+    }
+
+    @Test
+    void SUMvsSUMGPU511() {
+        final int SIZE = 511;
+
+        var a = GeneratorHelpers.initFloatArray(SIZE);
+        var bufferA = SVMBuffer.fromArray(SPECIES_SVM, a);
+        var bufferB = SVMBuffer.fromArray(SPECIES_SVM, a);
+        var c = new float[a.length];
+
+        var result = SumArray.scalarComputation(a, a);
+        var svm = SumArray.gpuSVMAddition(bufferA, bufferB);
+        svm.intoArray(c);
+
+        for (var i = 0; i < SIZE; i++) {
+            assertEquals(result[i], c[i], 0.001f);
+        }
+    }
+
+    @Test
+    void SUMvsSUMGPU512() {
+        final int SIZE = 512;
+
+        var a = GeneratorHelpers.initFloatArray(SIZE);
+        var bufferA = SVMBuffer.fromArray(SPECIES_SVM, a);
+        var bufferB = SVMBuffer.fromArray(SPECIES_SVM, a);
+        var c = new float[a.length];
+
+        var result = SumArray.scalarComputation(a, a);
+        var svm = SumArray.gpuSVMAddition(bufferA, bufferB);
+        svm.intoArray(c);
+
+        for (var i = 0; i < SIZE; i++) {
+            assertEquals(result[i], c[i], 0.001f);
+        }
+    }
+
+    @Test
+    void SUMvsSUMGPU513() {
+        final int SIZE = 513;
+
+        var a = GeneratorHelpers.initFloatArray(SIZE);
+        var bufferA = SVMBuffer.fromArray(SPECIES_SVM, a);
+        var bufferB = SVMBuffer.fromArray(SPECIES_SVM, a);
+        var c = new float[a.length];
+
+        var result = SumArray.scalarComputation(a, a);
+        var svm = SumArray.gpuSVMAddition(bufferA, bufferB);
+        svm.intoArray(c);
+
+        for (var i = 0; i < SIZE; i++) {
+            assertEquals(result[i], c[i], 0.001f);
+        }
+    }
+}
